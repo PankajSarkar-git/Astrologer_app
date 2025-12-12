@@ -6,16 +6,22 @@ import { textStyle } from '../../../constant/text-style';
 
 type BookingCardProps = {
   item: any;
-  onAccept?: (item: any) => void;
-  onReject?: (item: any) => void;
+  onAccept?: (payload: { id: string; status: string; otp: null }) => void;
+  onReject?: (payload: { id: string; status: string; otp: null }) => void;
+  onStartSession?: (item: any) => void;
 };
 
-export const BookingCard = ({ item, onAccept, onReject }: BookingCardProps) => {
+export const BookingCard = ({
+  item,
+  onAccept,
+  onReject,
+  onStartSession,
+}: BookingCardProps) => {
   const getStatusColor = (status: any) => {
-    if (status === 'Pending') return '#FFA726';
-    if (status === 'Confirmed') return '#42A5F5';
-    if (status === 'Completed') return '#4CAF50';
-    if (status === 'Cancelled') return '#F44336';
+    if (status === 'PENDING') return '#FFA726';
+    if (status === 'CONFIRMED') return '#42A5F5';
+    if (status === 'COMPLETED') return '#4CAF50';
+    if (status === 'CANCELLED') return '#F44336';
     return COLORS.theme.gray.light;
   };
 
@@ -25,15 +31,15 @@ export const BookingCard = ({ item, onAccept, onReject }: BookingCardProps) => {
     return '📞';
   };
 
-  const handleAccept = () => {
-    if (onAccept) onAccept(item);
-  };
+  const isPending = item.status === 'PENDING' || item.status === null;
+  const isApproved = item.status === 'APPROVED';
 
-  const handleReject = () => {
-    if (onReject) onReject(item);
-  };
-
-  const isPending = true;
+  const sessionLabel =
+    item.sessionType === 'CHAT'
+      ? 'Start Chat'
+      : item.sessionType === 'VIDEO'
+      ? 'Start Video'
+      : 'Start Call';
 
   return (
     <View
@@ -46,12 +52,11 @@ export const BookingCard = ({ item, onAccept, onReject }: BookingCardProps) => {
         borderColor: COLORS.theme.gray.light,
       }}
     >
+      {/* HEADER */}
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Image
           source={{
-            uri:
-              item.astrologer?.imgUri ||
-              'https://i.postimg.cc/52hKjTgP/user.png',
+            uri: item.user?.imgUri || 'https://i.postimg.cc/52hKjTgP/user.png',
           }}
           style={{
             width: scale(46),
@@ -62,12 +67,13 @@ export const BookingCard = ({ item, onAccept, onReject }: BookingCardProps) => {
         />
 
         <View style={{ flex: 1 }}>
-          <Text style={textStyle.fs_mont_16_600}>{item.astrologer?.name}</Text>
+          <Text style={textStyle.fs_mont_16_600}>{item.user?.name}</Text>
           <Text style={{ fontSize: scaleFont(12), marginTop: 2 }}>
             {getSessionTypeIcon(item.sessionType)} {item.sessionType}
           </Text>
         </View>
 
+        {/* STATUS */}
         <View
           style={{
             backgroundColor: getStatusColor(item.status),
@@ -77,11 +83,12 @@ export const BookingCard = ({ item, onAccept, onReject }: BookingCardProps) => {
           }}
         >
           <Text style={{ color: '#fff', fontSize: scaleFont(12) }}>
-            {item.status ? item.status : 'N/A'}
+            {item.status || 'PENDING'}
           </Text>
         </View>
       </View>
 
+      {/* DETAILS */}
       <Text style={{ marginTop: 10, fontSize: scaleFont(12) }}>
         📅 {item.appointmentDate} ⏱️ {item.appointmentDuration} mins
       </Text>
@@ -92,6 +99,13 @@ export const BookingCard = ({ item, onAccept, onReject }: BookingCardProps) => {
         </Text>
       ) : null}
 
+      {item.user.mobile ? (
+        <Text style={{ marginTop: 6, fontSize: scaleFont(12) }}>
+          Mobile: {item.user.mobile}
+        </Text>
+      ) : null}
+
+      {/* PENDING → Approve + Cancel */}
       {isPending && (
         <View
           style={{
@@ -100,8 +114,15 @@ export const BookingCard = ({ item, onAccept, onReject }: BookingCardProps) => {
             marginTop: verticalScale(12),
           }}
         >
+          {/* Cancel */}
           <TouchableOpacity
-            onPress={handleReject}
+            onPress={() =>
+              onReject?.({
+                id: item.id,
+                status: 'CANCEL',
+                otp: null,
+              })
+            }
             style={{
               paddingVertical: verticalScale(6),
               paddingHorizontal: scale(14),
@@ -111,18 +132,20 @@ export const BookingCard = ({ item, onAccept, onReject }: BookingCardProps) => {
               marginRight: scale(8),
             }}
           >
-            <Text
-              style={{
-                fontSize: scaleFont(12),
-                color: '#F44336',
-              }}
-            >
+            <Text style={{ fontSize: scaleFont(12), color: '#F44336' }}>
               Cancel
             </Text>
           </TouchableOpacity>
 
+          {/* Approve */}
           <TouchableOpacity
-            onPress={handleAccept}
+            onPress={() =>
+              onAccept?.({
+                id: item.id,
+                status: 'CONFIRM',
+                otp: null,
+              })
+            }
             style={{
               paddingVertical: verticalScale(6),
               paddingHorizontal: scale(14),
@@ -130,13 +153,33 @@ export const BookingCard = ({ item, onAccept, onReject }: BookingCardProps) => {
               backgroundColor: '#4CAF50',
             }}
           >
-            <Text
-              style={{
-                fontSize: scaleFont(12),
-                color: '#fff',
-              }}
-            >
+            <Text style={{ fontSize: scaleFont(12), color: '#fff' }}>
               Approve
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* APPROVED → Start Session */}
+      {isApproved && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginTop: verticalScale(12),
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => onStartSession?.(item)}
+            style={{
+              paddingVertical: verticalScale(6),
+              paddingHorizontal: scale(16),
+              borderRadius: scale(10),
+              backgroundColor: '#42A5F5',
+            }}
+          >
+            <Text style={{ color: '#fff', fontSize: scaleFont(13) }}>
+              {sessionLabel}
             </Text>
           </TouchableOpacity>
         </View>

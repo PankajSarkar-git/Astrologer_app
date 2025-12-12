@@ -29,22 +29,22 @@ export function usePosts(size: number = 10) {
 }
 
 // optional mutation hooks
-export function useCreatePost() {
+export function useCreatePost(options?: { onSuccess?: () => void }) {
   const client = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: any) => PostService.create(payload),
 
     onSuccess: res => {
-      console.log(res, 'res---');
-
       showToast({ type: 'success', message: res?.msg || 'Post created' });
+
+      // Component-specific success callback
+      options?.onSuccess?.();
+
       client.invalidateQueries({ queryKey: ['posts'] });
     },
 
     onError: (err: any) => {
-      console.log(err, 'err-----');
-
       showToast({
         type: 'error',
         message: err?.response?.data?.msg || 'Failed to create post',

@@ -40,23 +40,33 @@ export function useBookings(size: number = 10) {
     },
   });
 }
-
 export function useUpdateBookingStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, status }: UpdateStatusPayload) =>
-      BookingService.updateStatus(id, status),
+    mutationFn: async ({
+      id,
+      status,
+      otp = null,
+    }: {
+      id: string;
+      status: string;
+      otp?: number | null;
+    }) => BookingService.updateStatus(id, { status, otp } as any),
 
-    onSuccess: (data: any) => {
-      showToast({ message: data?.msg || 'Status updated', type: 'success' });
+    onSuccess: res => {
+      showToast({
+        message: res?.msg || 'Status updated successfully',
+        type: 'success',
+      });
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
 
-    onError: (error: any) => {
-      const message =
-        error?.response?.data?.msg || error?.message || 'Update failed';
-      showToast({ message, type: 'error' });
+    onError: (err: any) => {
+      const msg =
+        err?.response?.data?.msg || err?.message || 'Failed to update status';
+
+      showToast({ message: msg, type: 'error' });
     },
   });
 }

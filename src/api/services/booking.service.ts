@@ -23,9 +23,7 @@ export const BookingService = {
 
   updateStatus: async (id: string, status: string) => {
     try {
-      const res = await api.patch(`/api/v1/bookings/${id}/status`, {
-        status,
-      });
+      const res = await api.patch(`/api/v1/appointment/${id}`, status);
       return res.data;
     } catch (error: any) {
       console.log('BOOKING STATUS UPDATE ERROR =>', error.response?.data);
