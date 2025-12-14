@@ -6,93 +6,154 @@ import {
   TouchableOpacity,
   FlatList,
   Dimensions,
+  Pressable,
 } from 'react-native';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import Modal from 'react-native-modal';
+
 import { scale, verticalScale, scaleFont } from '../../../utils/sizer';
 import { COLORS } from '../../../constant/colors';
 import { LikeIcon, LikeIconFilled } from '../../../assets/icons/LikeIcon';
 import { CommentIcon } from '../../../assets/icons/CommentIcon';
+import ThreeDotIcon from '../../../assets/icons/ThreeDotIcon';
+import { useDeletePost } from '../../../api/hooks/usePosts';
+import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
 interface FeedPostProps {
+  id: string;
   astrologerName: string;
   profileImage: string;
   postImages: string[];
   caption: string;
+  refetch: () => void;
 }
 
 const FeedPost = ({
+  id,
   astrologerName,
   profileImage,
   postImages,
   caption,
+  refetch,
 }: FeedPostProps) => {
+  const flatListRef = useRef<FlatList>(null);
+  const navigation = useNavigation<any>();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isViewerVisible, setIsViewerVisible] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const { mutate: deletePost, isPending } = useDeletePost();
 
-  const toggleLike = () => {
-    setLiked(!liked);
+  const toggleLike = () => setLiked(prev => !prev);
+
+  const onEditPost = (id: string) => {
+    setMenuVisible(false);
+    navigation.navigate('EditPost', { id: id });
   };
-  const comment = () => {};
-  const openComments = () => {};
-  const flatListRef = useRef<FlatList>(null);
+
+  const onDeletePost = () => {
+    setMenuVisible(false);
+    setConfirmVisible(true);
+  };
+
+  const confirmDelete = () => {
+    deletePost(id);
+    setConfirmVisible(false);
+    refetch();
+  };
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
-    if (viewableItems.length > 0) {
+    if (viewableItems?.length) {
       setActiveIndex(viewableItems[0].index);
     }
   }).current;
 
-  // fallback for no images
   const safeImages = postImages?.length
     ? postImages
     : ['https://placehold.co/800x600?text=No+Image'];
 
   const formattedImages = safeImages.map(url => ({ url }));
 
+  const MAX_LENGTH = 100;
+  const isLong = caption.length > MAX_LENGTH;
+  const displayText =
+    expanded || !isLong ? caption : caption.slice(0, MAX_LENGTH);
+
   return (
-    <View
+    <Pressable
       style={{
         backgroundColor: COLORS.theme.white,
         marginBottom: verticalScale(20),
       }}
+      onPress={() => setMenuVisible(false)}
     >
       {/* HEADER */}
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          justifyContent: 'space-between',
           paddingHorizontal: scale(16),
           paddingVertical: verticalScale(10),
         }}
       >
-        <Image
-          source={{ uri: profileImage }}
-          style={{
-            height: scale(40),
-            width: scale(40),
-            borderRadius: scale(20),
-            marginRight: scale(10),
-          }}
-        />
-
-        <View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image
+            source={{ uri: profileImage }}
+            style={{
+              height: scale(40),
+              width: scale(40),
+              borderRadius: scale(20),
+              marginRight: scale(10),
+            }}
+          />
           <Text style={{ fontWeight: '600', fontSize: scaleFont(14) }}>
             {astrologerName}
           </Text>
-          <Text
-            style={{
-              fontSize: scaleFont(11),
-              color: COLORS.theme.gray.text,
-            }}
-          >
-            Vedic Astrologer • ★ 4.9
-          </Text>
         </View>
+
+        <Pressable
+          onPress={e => {
+            e.stopPropagation();
+            setMenuVisible(prev => !prev);
+          }}
+        >
+          <ThreeDotIcon size={22} color={COLORS.theme.gray.text} />
+        </Pressable>
       </View>
+
+      {/* DROPDOWN MENU */}
+      {menuVisible && (
+        <Pressable
+          onPress={e => e.stopPropagation()}
+          style={{
+            position: 'absolute',
+            top: verticalScale(55),
+            right: scale(16),
+            backgroundColor: COLORS.theme.white,
+            borderRadius: 8,
+            elevation: 10,
+            zIndex: 100,
+            width: 160,
+            paddingVertical: 8,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => onEditPost(id)}
+            style={{ padding: 12 }}
+          >
+            <Text style={{ fontSize: 14 }}>Edit Post</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={onDeletePost} style={{ padding: 12 }}>
+            <Text style={{ fontSize: 14, color: 'red' }}>Delete Post</Text>
+          </TouchableOpacity>
+        </Pressable>
+      )}
 
       {/* IMAGE CAROUSEL */}
       <FlatList
@@ -104,30 +165,24 @@ const FeedPost = ({
         showsHorizontalScrollIndicator={false}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
-        renderItem={({ item, index }) => {
-          console.log({ uri: item });
-
-          return (
-            <TouchableOpacity
-              activeOpacity={0.9}
-              onPress={() => {
-                setActiveIndex(index);
-                setIsViewerVisible(true);
+        renderItem={({ item, index }) => (
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => {
+              setActiveIndex(index);
+              setIsViewerVisible(true);
+            }}
+          >
+            <Image
+              source={{ uri: item }}
+              style={{
+                width,
+                height: verticalScale(350),
+                resizeMode: 'cover',
               }}
-            >
-              <Image
-                source={{
-                  uri: item,
-                }}
-                style={{
-                  width: width,
-                  height: verticalScale(350),
-                  resizeMode: 'cover',
-                }}
-              />
-            </TouchableOpacity>
-          );
-        }}
+            />
+          </TouchableOpacity>
+        )}
       />
 
       {/* DOT INDICATOR */}
@@ -164,14 +219,27 @@ const FeedPost = ({
           paddingBottom: verticalScale(10),
         }}
       >
-        <Text
-          style={{
-            fontSize: scaleFont(13),
-            marginTop: 4,
-          }}
-        >
-          {caption || ''}
-        </Text>
+        <View>
+          <Text style={{ fontSize: scaleFont(13), marginTop: 4 }}>
+            {displayText}
+            {!expanded && isLong ? '…' : ''}
+          </Text>
+
+          {isLong && (
+            <TouchableOpacity onPress={() => setExpanded(p => !p)}>
+              <Text
+                style={{
+                  marginTop: 4,
+                  fontSize: scaleFont(13),
+                  color: '#2563eb',
+                  fontWeight: '600',
+                }}
+              >
+                {expanded ? 'See less' : 'See more'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* ACTION BAR */}
@@ -188,7 +256,7 @@ const FeedPost = ({
           {liked ? <LikeIconFilled size={26} /> : <LikeIcon size={26} />}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={openComments}>
+        <TouchableOpacity>
           <CommentIcon size={26} />
         </TouchableOpacity>
       </View>
@@ -206,64 +274,84 @@ const FeedPost = ({
             index={activeIndex}
             enableSwipeDown
             onSwipeDown={() => setIsViewerVisible(false)}
-            enablePreload
-            enableImageZoom
             saveToLocalByLongPress={false}
             backgroundColor="black"
-            style={{ width: '100%', height: '100%' }}
-            renderHeader={() => (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 50,
-                  left: 20,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-              >
-                <Image
-                  source={{ uri: profileImage }}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    marginRight: 10,
-                  }}
-                />
-                <Text
-                  style={{
-                    color: '#fff',
-                    fontSize: 14,
-                    fontWeight: '600',
-                  }}
-                >
-                  {astrologerName}
-                </Text>
-              </View>
-            )}
-            renderFooter={() => (
-              <View
-                style={{
-                  width: '100%',
-                  paddingHorizontal: 20,
-                  paddingBottom: 40,
-                }}
-              >
-                <Text
-                  style={{
-                    color: '#fff',
-                    fontSize: 14,
-                    textAlign: 'center',
-                  }}
-                >
-                  {caption}
-                </Text>
-              </View>
-            )}
           />
         </View>
       </Modal>
-    </View>
+
+      {/* DELETE CONFIRM MODAL */}
+      {confirmVisible && (
+        <Pressable
+          onPress={() => setConfirmVisible(false)}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            zIndex: 200,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Pressable
+            onPress={e => e.stopPropagation()}
+            style={{
+              width: '85%',
+              backgroundColor: COLORS.theme.white,
+              borderRadius: 12,
+              padding: scale(20),
+            }}
+          >
+            <Text
+              style={{
+                fontSize: scaleFont(16),
+                fontWeight: '600',
+                marginBottom: verticalScale(8),
+              }}
+            >
+              Delete post?
+            </Text>
+
+            <Text
+              style={{
+                fontSize: scaleFont(13),
+                color: COLORS.theme.gray.text,
+                marginBottom: verticalScale(20),
+              }}
+            >
+              This action cannot be undone.
+            </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                gap: scale(16),
+              }}
+            >
+              <TouchableOpacity onPress={() => setConfirmVisible(false)}>
+                <Text style={{ fontSize: 14 }}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity disabled={isPending} onPress={confirmDelete}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: isPending ? '#aaa' : 'red',
+                    fontWeight: '600',
+                  }}
+                >
+                  Delete
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      )}
+    </Pressable>
   );
 };
 

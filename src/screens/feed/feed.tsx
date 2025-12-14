@@ -40,6 +40,8 @@ const Feed = () => {
           contentContainerStyle={{ paddingBottom: 60 }}
           renderItem={({ item }) => (
             <FeedPost
+              id={item.id}
+              refetch={refetch}
               astrologerName={item.astrologer?.user?.name ?? ''}
               profileImage={item.astrologer?.user?.imgUri}
               postImages={item.images?.map((img: any) => img.imagUrl) ?? []}
