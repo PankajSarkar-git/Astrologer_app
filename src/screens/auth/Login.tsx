@@ -228,7 +228,7 @@ const Login = () => {
         className="ml-5 font-medium"
         style={{ fontSize: scaleFont(32), color: COLORS.theme.white }}
       >
-        Astroseva
+        Astrosevaa
       </Text>
 
       {/* FORM */}

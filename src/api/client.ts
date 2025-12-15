@@ -21,6 +21,7 @@ import { getTokenFromStore } from '../utils/get-token';
 
 export const api = axios.create({
   baseURL: 'https://backend.astrosevaa.com',
+  // baseURL: 'https://severe-aliza-honourably.ngrok-free.dev',
   timeout: 10000,
 });
 
@@ -33,7 +34,15 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // log request
+    // only set json content type when request data is plain object
+    if (
+      config.data &&
+      typeof config.data === 'object' &&
+      !(config.data instanceof FormData)
+    ) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
     console.log('%cAPI REQUEST', 'color: blue; font-weight: bold;', {
       url: config.url,
       method: config.method,
@@ -44,10 +53,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  error => {
-    console.log('%cAPI REQUEST ERROR', 'color: red; font-weight: bold;', error);
-    return Promise.reject(error);
-  },
+  error => Promise.reject(error),
 );
 
 // RESPONSE INTERCEPTOR
