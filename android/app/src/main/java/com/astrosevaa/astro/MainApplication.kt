@@ -1,4 +1,4 @@
-package com.astrologers
+package com.astrosevaa.astro
 
 import android.app.Application
 import com.facebook.react.PackageList
