@@ -18,6 +18,7 @@ import { CommentIcon } from '../../../assets/icons/CommentIcon';
 import ThreeDotIcon from '../../../assets/icons/ThreeDotIcon';
 import { useDeletePost } from '../../../api/hooks/usePosts';
 import { useNavigation } from '@react-navigation/native';
+import { useAppSelector } from '../../../hooks/redux-hook';
 
 const { width } = Dimensions.get('window');
 
@@ -27,6 +28,7 @@ interface FeedPostProps {
   profileImage: string;
   postImages: string[];
   caption: string;
+  astrologerId: string;
   refetch: () => void;
 }
 
@@ -37,6 +39,7 @@ const FeedPost = ({
   postImages,
   caption,
   refetch,
+  astrologerId,
 }: FeedPostProps) => {
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation<any>();
@@ -47,7 +50,7 @@ const FeedPost = ({
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const { mutate: deletePost, isPending } = useDeletePost();
-
+  const userId = useAppSelector(store => store.auth.user.id);
   const toggleLike = () => setLiked(prev => !prev);
 
   const onEditPost = (id: string) => {
@@ -116,14 +119,16 @@ const FeedPost = ({
           </Text>
         </View>
 
-        <Pressable
-          onPress={e => {
-            e.stopPropagation();
-            setMenuVisible(prev => !prev);
-          }}
-        >
-          <ThreeDotIcon size={22} color={COLORS.theme.gray.text} />
-        </Pressable>
+        {astrologerId === userId && (
+          <Pressable
+            onPress={e => {
+              e.stopPropagation();
+              setMenuVisible(prev => !prev);
+            }}
+          >
+            <ThreeDotIcon size={22} color={COLORS.theme.gray.text} />
+          </Pressable>
+        )}
       </View>
 
       {/* DROPDOWN MENU */}
