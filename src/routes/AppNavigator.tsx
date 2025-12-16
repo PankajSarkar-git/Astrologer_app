@@ -10,12 +10,18 @@ import BottomTabNavigator from '../components/layout/bottom-tabs';
 import EditPost from '../screens/Post/EditPost';
 import { RootStackParamList } from './types';
 import useFcm from '../hooks/useFCM';
+import {
+  ZegoUIKitPrebuiltCallInCallScreen,
+  ZegoUIKitPrebuiltCallWaitingScreen,
+} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import { useZegoAndFCM } from '../hooks/useZego';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
-  const token = useSelector((state: RootState) => state.auth.token);
+  const { token, user } = useSelector((state: RootState) => state.auth);
   useFcm(!!token);
+  useZegoAndFCM(user?.mobile, user?.name, !!token);
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -23,6 +29,18 @@ export default function AppNavigator() {
         <Stack.Screen name="Login" component={Login} />
       ) : (
         <>
+          {/* <Stack.Screen
+            options={{ headerShown: false }}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallWaitingScreen"
+            component={ZegoUIKitPrebuiltCallWaitingScreen}
+          />
+          <Stack.Screen
+            options={{ headerShown: false }}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallInCallScreen"
+            component={ZegoUIKitPrebuiltCallInCallScreen}
+          /> */}
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="EditPost" component={EditPost} />
         </>

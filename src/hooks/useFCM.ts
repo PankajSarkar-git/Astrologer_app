@@ -10,7 +10,7 @@ import {
   FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging';
 // import Toast from 'react-native-toast-message';
-import { useAppDispatch } from '../hooks/redux-hook';
+import { useAppDispatch } from './redux-hook';
 // import { registerDevice } from '../store/reducer/auth';
 
 export default function useFcm(isAuthenticated: boolean) {
