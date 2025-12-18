@@ -42,7 +42,7 @@ const getTabIcon = (routeName: string, focused: boolean, color: string) => {
     case 'Post':
       return <PlusIcon size={size} color={color} />;
 
-    case 'Bookings':
+    case 'Remedies':
       return <BookingIcon size={size} color={color} />;
 
     case 'User':
@@ -84,7 +84,7 @@ function BottomTabNavigator() {
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Feed" component={Feed} />
       <Tab.Screen name="Post" component={Post} />
-      <Tab.Screen name="Bookings" component={Booking} />
+      <Tab.Screen name="Remedies" component={Remedies} />
       <Tab.Screen name="User" component={Remedies} />
     </Tab.Navigator>
   );

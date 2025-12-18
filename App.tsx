@@ -1,7 +1,7 @@
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './src/store';
-import { StatusBar, useColorScheme, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar, useColorScheme } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import './global.css';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -17,13 +17,18 @@ function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <SafeAreaProvider>
-          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-          <QueryClientProvider client={queryClient}>
-            <NavigationContainer>
-              <AppNavigator />
-            </NavigationContainer>
-            <Toast />
-          </QueryClientProvider>
+          <SafeAreaView style={{ flex: 1 }}>
+            <StatusBar
+              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            />
+
+            <QueryClientProvider client={queryClient}>
+              <NavigationContainer>
+                <AppNavigator />
+              </NavigationContainer>
+              <Toast />
+            </QueryClientProvider>
+          </SafeAreaView>
         </SafeAreaProvider>
       </PersistGate>
     </Provider>

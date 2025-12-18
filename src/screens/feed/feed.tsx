@@ -41,6 +41,7 @@ const Feed = () => {
           renderItem={({ item }) => (
             <FeedPost
               id={item.id}
+              astrologerId={item.astrologer.user.id}
               refetch={refetch}
               astrologerName={item.astrologer?.user?.name ?? ''}
               profileImage={item.astrologer?.user?.imgUri}

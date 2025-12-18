@@ -1,4 +1,4 @@
-package com.astrologers
+package com.astrosevaa.astro
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

@@ -141,7 +141,7 @@ const Home = () => {
         <Text
           style={{
             fontSize: 24,
-            color: COLORS.theme.primary,
+            color: COLORS.theme.black,
             marginBottom: 20,
           }}
         >
