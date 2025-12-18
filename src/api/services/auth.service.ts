@@ -36,8 +36,8 @@ export const AuthService = {
     return res.data; // user object
   },
 
-  logout: async () => {
-    const res = await api.post('/auth/logout');
+  deviceToken: async (payload: string) => {
+    const res = await api.post('/api/v1/device-token/register', payload);
     return res.data;
   },
 };
