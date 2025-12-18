@@ -29,7 +29,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Login" component={Login} />
       ) : (
         <>
-          {/* <Stack.Screen
+          <Stack.Screen
             options={{ headerShown: false }}
             // DO NOT change the name
             name="ZegoUIKitPrebuiltCallWaitingScreen"
@@ -40,7 +40,7 @@ export default function AppNavigator() {
             // DO NOT change the name
             name="ZegoUIKitPrebuiltCallInCallScreen"
             component={ZegoUIKitPrebuiltCallInCallScreen}
-          /> */}
+          />
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="EditPost" component={EditPost} />
         </>

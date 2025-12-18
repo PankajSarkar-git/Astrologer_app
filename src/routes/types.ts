@@ -6,4 +6,6 @@ export type RootStackParamList = {
   EditPost: {
     id: string;
   };
+  ZegoUIKitPrebuiltCallWaitingScreen: undefined;
+  ZegoUIKitPrebuiltCallInCallScreen: undefined;
 };
