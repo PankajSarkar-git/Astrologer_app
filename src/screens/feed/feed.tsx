@@ -27,7 +27,7 @@ const Feed = () => {
   );
 
   return (
-    <PageWithHeader scroll={false}>
+    <PageWithHeader scrollEnabled={false}>
       <View style={{ flex: 1, backgroundColor: COLORS.theme.white }}>
         {isLoading && (
           <ActivityIndicator size="large" style={{ marginTop: 50 }} />

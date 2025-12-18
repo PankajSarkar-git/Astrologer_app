@@ -1,0 +1,62 @@
+import { api } from '../client';
+
+type GetAstrologersParams = {
+  page?: number;
+  size?: number;
+};
+
+export const AstrologerService = {
+  /* -------- LIST -------- */
+  getAll: async (params?: GetAstrologersParams) => {
+    const page = params?.page ?? 1;
+    const size = params?.size ?? 10;
+
+    const res = await api.get('/api/v1/astrologers', {
+      params: { page, size },
+    });
+
+    return res.data;
+  },
+
+  /* -------- READ SINGLE -------- */
+  getById: async (id: string) => {
+    const res = await api.get(`/api/v1/astrologers/${id}`);
+    return res.data;
+  },
+
+  /*------------- me -------------*/
+  getMe: async () => {
+    const res = await api.get(`/api/v1/users`);
+    return res.data;
+  },
+
+  /* -------- UPDATE DETAILS -------- */
+  updateDetails: async (id: string, payload: FormData) => {
+    console.log('[updateAstrologer] id:', id);
+
+    try {
+      const res = await api.put(`/api/v1/astrologers/${id}`, payload, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('[updateAstrologer] success');
+      return res.data;
+    } catch (err: any) {
+      console.log(
+        '[updateAstrologer] failed:',
+        err?.response?.status || err?.message,
+      );
+      throw err;
+    }
+  },
+
+  /* -------- CHANGE ONLINE STATUS -------- */
+  changeOnline: async (isOnline: boolean) => {
+    const res = await api.post('/api/v1/astrologers/change-online', {
+      isOnline,
+    });
+    return res.data;
+  },
+};

@@ -30,7 +30,7 @@ import LogoutIcon from '../../assets/icons/logout-icon';
 
 import { useNavigation } from '@react-navigation/native';
 import { scale } from '../../utils/sizer';
-import { useAppDispatch } from '../../hooks/redux-hook';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
 import { logout } from '../../store/reducer/auth';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -45,34 +45,34 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   const sidebarAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const overlayAnim = useRef(new Animated.Value(0)).current;
   // console.log(ref, 'ref');
-
+  const { user } = useAppSelector(store => store.auth);
   const navigation = useNavigation<any>();
 
   const navItems = [
     { title: 'Home', href: 'Home', icon: <HomeIcon size={20} /> },
-    {
-      title: 'Horoscope',
-      href: 'Horoscope',
-      icon: <HoroscopeIcon size={20} />,
-    },
-    { title: 'Kundli', href: 'KundliForm', icon: <KundliBookIcon size={20} /> },
-    {
-      title: 'Astrologers',
-      href: 'Astrologers',
-      icon: <AstrologerIcon size={20} />,
-    },
-    {
-      title: 'Chat History',
-      href: 'ChatHistory',
-      icon: <ChatIcon size={20} />,
-    },
+    // {
+    //   title: 'Horoscope',
+    //   href: 'Horoscope',
+    //   icon: <HoroscopeIcon size={20} />,
+    // },
+    // { title: 'Kundli', href: 'KundliForm', icon: <KundliBookIcon size={20} /> },
+    // {
+    //   title: 'Astrologers',
+    //   href: 'Astrologers',
+    //   icon: <AstrologerIcon size={20} />,
+    // },
+    // {
+    //   title: 'Chat History',
+    //   href: 'ChatHistory',
+    //   icon: <ChatIcon size={20} />,
+    // },
     { title: 'Wallet', href: 'Wallet', icon: <WalletIcon size={20} /> },
-    {
-      title: 'Customer Support',
-      href: 'customer-support',
-      icon: <HelpIcon size={20} />,
-    },
-    { title: 'Setting', href: 'Setting', icon: <SettingIcon size={20} /> },
+    // {
+    //   title: 'Customer Support',
+    //   href: 'customer-support',
+    //   icon: <HelpIcon size={20} />,
+    // },
+    // { title: 'Setting', href: 'Setting', icon: <SettingIcon size={20} /> },
     { title: 'About', href: 'about', icon: <AboutIcon size={20} /> },
     { title: 'Logout', href: '', icon: <LogoutIcon size={20} color="red" /> },
   ];
@@ -149,13 +149,12 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* User Info */}
           <View style={styles.userSection}>
-            <Image
-              source={require('../../assets/imgs/profile-demo.jpg')}
-              style={styles.avatar}
-            />
+            <Image source={{ uri: user.imgUri }} style={styles.avatar} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.username}>Astro Priya</Text>
-              <Text style={styles.balanceText}>Balance: ₹ 1200.00</Text>
+              <Text style={styles.username}>{user.name}</Text>
+              <Text style={styles.balanceText}>
+                Balance: ₹ {user.walletBalance}
+              </Text>
             </View>
           </View>
 

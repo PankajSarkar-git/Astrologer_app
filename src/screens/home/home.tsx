@@ -134,7 +134,7 @@ const Home = () => {
   );
 
   return (
-    <PageWithHeader scroll={false}>
+    <PageWithHeader scrollEnabled={false}>
       <View
         style={{ padding: 20, flex: 1, backgroundColor: COLORS.theme.white }}
       >

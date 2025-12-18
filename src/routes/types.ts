@@ -6,4 +6,10 @@ export type RootStackParamList = {
   EditPost: {
     id: string;
   };
+  ProfileEdit: {
+    id: string;
+  };
+  about: undefined;
+  Wallet: undefined;
+  Splash: undefined;
 };

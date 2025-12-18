@@ -4,15 +4,13 @@ import Home from '../../screens/home/home';
 import { COLORS } from '../../constant/colors';
 import Feed from '../../screens/feed/feed';
 import Post from '../../screens/Post/post';
-import Booking from '../../screens/booking/booking';
-import Remedies from '../../screens/remedies';
+import Remedies from '../../screens/remedies/index';
 import HomeIcon from '../../assets/svgs/home-icon';
 import FeedIcon from '../../assets/svgs/feed-icon';
-import AstrologerIcon from '../../assets/svgs/astrologer-icon';
-import BookingIcon from '../../assets/svgs/booking-icon';
 import RemediesIcon from '../../assets/svgs/remedies-icon';
 import PlusIcon from '../../assets/icons/plus-icon';
 import UserIcon from '../../assets/icons/user-icon';
+import ProfilePage from '../../screens/profile/profile';
 
 const Tab = createBottomTabNavigator();
 
@@ -43,7 +41,7 @@ const getTabIcon = (routeName: string, focused: boolean, color: string) => {
       return <PlusIcon size={size} color={color} />;
 
     case 'Remedies':
-      return <BookingIcon size={size} color={color} />;
+      return <RemediesIcon size={size} color={color} />;
 
     case 'User':
       return <UserIcon size={size} color={color} />;
@@ -85,7 +83,7 @@ function BottomTabNavigator() {
       <Tab.Screen name="Feed" component={Feed} />
       <Tab.Screen name="Post" component={Post} />
       <Tab.Screen name="Remedies" component={Remedies} />
-      <Tab.Screen name="User" component={Remedies} />
+      <Tab.Screen name="User" component={ProfilePage} />
     </Tab.Navigator>
   );
 }
