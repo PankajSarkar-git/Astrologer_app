@@ -310,7 +310,18 @@ import { useAppSelector } from '../../hooks/redux-hook';
 import {
   useAstrologerDetail,
   useUpdateAstrologer,
+  useUpdateAstrologerProfilePic,
 } from '../../api/hooks/useAstrologers';
+export interface Form {
+  name: string;
+  mobile: string;
+  expertise: string;
+  experienceYears: string;
+  pricePerMinuteChat: string;
+  pricePerMinuteVoice: string;
+  pricePerMinuteVideo: string;
+  about: string;
+}
 
 const AstrologerProfileEdit = () => {
   const navigation = useNavigation<any>();
@@ -322,9 +333,9 @@ const AstrologerProfileEdit = () => {
 
   const [errors, setErrors] = useState<string[]>([]);
   const [profileImageUri, setProfileImageUri] = useState('');
-  const [newImageFile, setNewImageFile] = useState<any>(null);
-
-  const [form, setForm] = useState({
+  const { mutate: updateProfilePic, isPending: uploadingPic } =
+    useUpdateAstrologerProfilePic();
+  const [form, setForm] = useState<Form>({
     name: '',
     mobile: '',
     expertise: '',
@@ -353,7 +364,6 @@ const AstrologerProfileEdit = () => {
     });
 
     setProfileImageUri(astro.user?.imgUri ?? '');
-    setNewImageFile(null);
   }, [data]);
 
   /* ---------- IMAGE PICK ---------- */
@@ -364,12 +374,25 @@ const AstrologerProfileEdit = () => {
       const asset = res.assets[0];
       if (!asset.uri) return;
 
-      setProfileImageUri(asset.uri);
-      setNewImageFile({
+      const file = {
         uri: asset.uri,
         name: asset.fileName || `astrologer-${astrologerId}.jpg`,
         type: asset.type || 'image/jpeg',
-      });
+      };
+
+      // optimistic UI
+      setProfileImageUri(asset.uri);
+
+      // 🔥 REAL UPLOAD
+      updateProfilePic(
+        { id: astrologerId, file },
+        {
+          onError: () => {
+            // rollback on failure
+            setProfileImageUri(data?.astrologer?.user?.imgUri ?? '');
+          },
+        },
+      );
     });
   };
 
@@ -397,16 +420,8 @@ const AstrologerProfileEdit = () => {
   const handleSubmit = () => {
     if (!validate()) return;
 
-    const formData = new FormData();
-
-    formData.append('data', form);
-
-    if (newImageFile) {
-      formData.append('image', newImageFile);
-    }
-
     updateAstrologer(
-      { id: astrologerId, payload: formData },
+      { id: astrologerId, payload: form },
       { onSuccess: () => navigation.goBack() },
     );
   };
@@ -420,7 +435,10 @@ const AstrologerProfileEdit = () => {
         <View style={styles.container}>
           {/* IMAGE */}
           <View style={styles.avatarWrapper}>
-            <TouchableWithoutFeedback onPress={handlePickImage}>
+            <TouchableWithoutFeedback
+              onPress={handlePickImage}
+              disabled={uploadingPic}
+            >
               <View>
                 <Image
                   source={{ uri: profileImageUri || fallbackImage }}

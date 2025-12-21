@@ -127,12 +127,6 @@ const Home = () => {
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, []),
-  );
-
   return (
     <PageWithHeader scrollEnabled={false}>
       <View
@@ -166,6 +160,8 @@ const Home = () => {
 
         {!isLoading && bookings.length > 0 && (
           <FlatList
+            refreshing={isLoading}
+            onRefresh={refetch}
             className="mb-16"
             data={bookings}
             nestedScrollEnabled

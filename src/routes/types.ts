@@ -3,6 +3,8 @@
 export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
+  History: undefined;
+  ChatScreen: undefined;
   EditPost: {
     id: string;
   };
@@ -12,4 +14,10 @@ export type RootStackParamList = {
   about: undefined;
   Wallet: undefined;
   Splash: undefined;
+  ZegoUIKitPrebuiltCallWaitingScreen: {
+    roomID: string;
+  };
+  ZegoUIKitPrebuiltCallInCallScreen: {
+    roomID: string;
+  };
 };

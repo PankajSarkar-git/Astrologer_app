@@ -38,6 +38,8 @@ const Feed = () => {
           keyExtractor={item => item.id?.toString()}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 60 }}
+          refreshing={isLoading}
+          onRefresh={refetch}
           renderItem={({ item }) => (
             <FeedPost
               id={item.id}
@@ -47,6 +49,9 @@ const Feed = () => {
               profileImage={item.astrologer?.user?.imgUri}
               postImages={item.images?.map((img: any) => img.imagUrl) ?? []}
               caption={item.text ?? ''}
+              liked={item.liked}
+              initialLikesCount={item.likeCount}
+              initialCommentCount={item.commentCount}
             />
           )}
           onEndReachedThreshold={0.3}

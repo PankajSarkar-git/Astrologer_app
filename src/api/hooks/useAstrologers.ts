@@ -9,7 +9,16 @@ import { showToast } from '../../components/common/toast';
 
 type UpdateAstrologerPayload = {
   id: string;
-  payload: FormData;
+  payload: {
+    name: string;
+    mobile: string;
+    expertise: string;
+    experienceYears: string;
+    pricePerMinuteChat: string;
+    pricePerMinuteVoice: string;
+    pricePerMinuteVideo: string;
+    about: string;
+  };
 };
 
 /* ---------------- LIST ---------------- */
@@ -114,6 +123,43 @@ export function useChangeAstrologerOnline() {
       showToast({
         type: 'error',
         message: err?.response?.data?.msg || 'Failed to update status',
+      });
+    },
+  });
+}
+
+/* ---------------- UPDATE PROFILE PIC ---------------- */
+
+export function useUpdateAstrologerProfilePic() {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: any }) =>
+      AstrologerService.updateProfilePic(id, file),
+
+    retry: false,
+
+    onSuccess: res => {
+      showToast({
+        type: 'success',
+        message: res?.msg || 'Profile picture updated',
+      });
+
+      // 🔥 keep all related data in sync
+      client.invalidateQueries({ queryKey: ['me'] });
+      client.invalidateQueries({ queryKey: ['astrologer'] });
+      client.invalidateQueries({ queryKey: ['astrologers'] });
+    },
+
+    onError: (err: any) => {
+      const message =
+        err?.response?.data?.msg ||
+        err?.message ||
+        'Failed to update profile picture';
+
+      showToast({
+        type: 'error',
+        message,
       });
     },
   });

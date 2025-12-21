@@ -37,7 +37,9 @@ export const AuthService = {
   },
 
   deviceToken: async (payload: string) => {
-    const res = await api.post('/api/v1/device-token/register', payload);
+    const res = await api.post('/api/v1/device-token/register', {
+      deviceToken: payload,
+    });
     return res.data;
   },
 };

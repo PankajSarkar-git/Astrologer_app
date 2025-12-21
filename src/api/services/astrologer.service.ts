@@ -1,3 +1,4 @@
+import { Form } from '../../screens/profile/pofile-edit';
 import { api } from '../client';
 
 type GetAstrologersParams = {
@@ -31,7 +32,7 @@ export const AstrologerService = {
   },
 
   /* -------- UPDATE DETAILS -------- */
-  updateDetails: async (id: string, payload: FormData) => {
+  updateDetails: async (id: string, payload: Form) => {
     console.log('[updateAstrologer] id:', id);
 
     try {
@@ -57,6 +58,22 @@ export const AstrologerService = {
     const res = await api.post('/api/v1/astrologers/change-online', {
       isOnline,
     });
+    return res.data;
+  },
+  updateProfilePic: async (id: string, file: any) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const res = await api.post(
+      `/api/v1/astrologers/profile-pic/${id}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+
     return res.data;
   },
 };

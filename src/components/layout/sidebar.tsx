@@ -32,6 +32,7 @@ import { useNavigation } from '@react-navigation/native';
 import { scale } from '../../utils/sizer';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
 import { logout } from '../../store/reducer/auth';
+import HistoryIcon from '../../assets/icon/history-icon';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -67,11 +68,11 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
     //   icon: <ChatIcon size={20} />,
     // },
     { title: 'Wallet', href: 'Wallet', icon: <WalletIcon size={20} /> },
-    // {
-    //   title: 'Customer Support',
-    //   href: 'customer-support',
-    //   icon: <HelpIcon size={20} />,
-    // },
+    {
+      title: 'History',
+      href: 'History',
+      icon: <HistoryIcon size={20} />,
+    },
     // { title: 'Setting', href: 'Setting', icon: <SettingIcon size={20} /> },
     { title: 'About', href: 'about', icon: <AboutIcon size={20} /> },
     { title: 'Logout', href: '', icon: <LogoutIcon size={20} color="red" /> },

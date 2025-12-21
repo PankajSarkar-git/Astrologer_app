@@ -3,6 +3,7 @@ import React from 'react';
 import { scale, scaleFont, verticalScale } from '../../../utils/sizer';
 import { COLORS } from '../../../constant/colors';
 import { textStyle } from '../../../constant/text-style';
+import { ZegoSendCallInvitationButton } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 
 type BookingCardProps = {
   item: any;
@@ -184,6 +185,11 @@ export const BookingCard = ({
           </TouchableOpacity>
         </View>
       )}
+      {/* <ZegoSendCallInvitationButton
+        invitees={[{ userID: item.user.mobile, userName: item.user.name }]}
+        isVideoCall={false}
+        resourceID={'zego_call'}
+      /> */}
     </View>
   );
 };

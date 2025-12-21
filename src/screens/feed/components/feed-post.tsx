@@ -10,15 +10,19 @@ import {
 } from 'react-native';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import Modal from 'react-native-modal';
+import { useNavigation } from '@react-navigation/native';
 
 import { scale, verticalScale, scaleFont } from '../../../utils/sizer';
 import { COLORS } from '../../../constant/colors';
+
 import { LikeIcon, LikeIconFilled } from '../../../assets/icons/LikeIcon';
-import { CommentIcon } from '../../../assets/icons/CommentIcon';
+import CommentIcon from '../../../assets/icons/CommentIcon';
 import ThreeDotIcon from '../../../assets/icons/ThreeDotIcon';
-import { useDeletePost } from '../../../api/hooks/usePosts';
-import { useNavigation } from '@react-navigation/native';
+
+import { useDeletePost, useLikePost } from '../../../api/hooks/usePosts';
 import { useAppSelector } from '../../../hooks/redux-hook';
+
+import CommentsBottomSheet from './comments-bottom-sheet';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +33,9 @@ interface FeedPostProps {
   postImages: string[];
   caption: string;
   astrologerId: string;
+  liked: boolean;
+  initialLikesCount: number;
+  initialCommentCount: number;
   refetch: () => void;
 }
 
@@ -40,34 +47,67 @@ const FeedPost = ({
   caption,
   refetch,
   astrologerId,
+  liked: initialLiked,
+  initialLikesCount,
+  initialCommentCount,
 }: FeedPostProps) => {
   const flatListRef = useRef<FlatList>(null);
   const navigation = useNavigation<any>();
+  const userId = useAppSelector(store => store.auth.user.id);
+
   const [activeIndex, setActiveIndex] = useState(0);
   const [isViewerVisible, setIsViewerVisible] = useState(false);
-  const [liked, setLiked] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const { mutate: deletePost, isPending } = useDeletePost();
-  const userId = useAppSelector(store => store.auth.user.id);
-  const toggleLike = () => setLiked(prev => !prev);
 
-  const onEditPost = (id: string) => {
-    setMenuVisible(false);
-    navigation.navigate('EditPost', { id: id });
+  // 🔥 COMMENT SHEET STATE
+  const [commentVisible, setCommentVisible] = useState(false);
+
+  // 🔥 LIKE STATE
+  const [liked, setLiked] = useState(initialLiked);
+  const [likesCount, setLikesCount] = useState(initialLikesCount);
+
+  const { mutate: deletePost, isPending: deleting } = useDeletePost();
+  const { mutate: likePost, isPending: liking } = useLikePost();
+
+  /* ---------------- LIKE ---------------- */
+
+  const toggleLike = () => {
+    if (liking) return;
+
+    const prevLiked = liked;
+    const prevCount = likesCount;
+
+    setLiked(!prevLiked);
+    setLikesCount(prevLiked ? prevCount - 1 : prevCount + 1);
+
+    likePost(
+      {
+        postId: id,
+        status: prevLiked ? 'unlike' : 'like',
+      },
+      {
+        onError: () => {
+          setLiked(prevLiked);
+          setLikesCount(prevCount);
+        },
+      },
+    );
   };
 
-  const onDeletePost = () => {
-    setMenuVisible(false);
-    setConfirmVisible(true);
-  };
+  /* ---------------- DELETE ---------------- */
 
   const confirmDelete = () => {
-    deletePost(id);
-    setConfirmVisible(false);
-    refetch();
+    deletePost(id, {
+      onSuccess: () => {
+        setConfirmVisible(false);
+        refetch();
+      },
+    });
   };
+
+  /* ---------------- CAROUSEL ---------------- */
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems?.length) {
@@ -81,151 +121,130 @@ const FeedPost = ({
 
   const formattedImages = safeImages.map(url => ({ url }));
 
+  /* ---------------- CAPTION ---------------- */
+
   const MAX_LENGTH = 100;
   const isLong = caption.length > MAX_LENGTH;
   const displayText =
     expanded || !isLong ? caption : caption.slice(0, MAX_LENGTH);
 
+  /* ---------------- RENDER ---------------- */
+
   return (
-    <Pressable
-      style={{
-        backgroundColor: COLORS.theme.white,
-        marginBottom: verticalScale(20),
-      }}
-      onPress={() => setMenuVisible(false)}
-    >
-      {/* HEADER */}
-      <View
+    <>
+      <Pressable
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingHorizontal: scale(16),
-          paddingVertical: verticalScale(10),
+          backgroundColor: COLORS.theme.white,
+          marginBottom: verticalScale(20),
         }}
+        onPress={() => setMenuVisible(false)}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Image
-            source={{ uri: profileImage }}
-            style={{
-              height: scale(40),
-              width: scale(40),
-              borderRadius: scale(20),
-              marginRight: scale(10),
-            }}
-          />
-          <Text style={{ fontWeight: '600', fontSize: scaleFont(14) }}>
-            {astrologerName}
-          </Text>
-        </View>
-
-        {astrologerId === userId && (
-          <Pressable
-            onPress={e => {
-              e.stopPropagation();
-              setMenuVisible(prev => !prev);
-            }}
-          >
-            <ThreeDotIcon size={22} color={COLORS.theme.gray.text} />
-          </Pressable>
-        )}
-      </View>
-
-      {/* DROPDOWN MENU */}
-      {menuVisible && (
-        <Pressable
-          onPress={e => e.stopPropagation()}
-          style={{
-            position: 'absolute',
-            top: verticalScale(55),
-            right: scale(16),
-            backgroundColor: COLORS.theme.white,
-            borderRadius: 8,
-            elevation: 10,
-            zIndex: 100,
-            width: 160,
-            paddingVertical: 8,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => onEditPost(id)}
-            style={{ padding: 12 }}
-          >
-            <Text style={{ fontSize: 14 }}>Edit Post</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={onDeletePost} style={{ padding: 12 }}>
-            <Text style={{ fontSize: 14, color: 'red' }}>Delete Post</Text>
-          </TouchableOpacity>
-        </Pressable>
-      )}
-
-      {/* IMAGE CAROUSEL */}
-      <FlatList
-        ref={flatListRef}
-        data={safeImages}
-        keyExtractor={(_, index) => index.toString()}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => {
-              setActiveIndex(index);
-              setIsViewerVisible(true);
-            }}
-          >
-            <Image
-              source={{ uri: item }}
-              style={{
-                width,
-                height: verticalScale(350),
-                resizeMode: 'cover',
-              }}
-            />
-          </TouchableOpacity>
-        )}
-      />
-
-      {/* DOT INDICATOR */}
-      {safeImages.length > 1 && (
+        {/* HEADER */}
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: 'center',
-            marginTop: verticalScale(8),
+            justifyContent: 'space-between',
+            paddingHorizontal: scale(16),
+            paddingVertical: verticalScale(10),
           }}
         >
-          {safeImages.map((_, index) => (
-            <View
-              key={index}
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image
+              source={{ uri: profileImage }}
               style={{
-                width: scale(6),
-                height: scale(6),
-                borderRadius: 10,
-                backgroundColor:
-                  activeIndex === index
-                    ? COLORS.theme.primary
-                    : COLORS.theme.gray.light,
-                marginHorizontal: scale(4),
+                height: scale(40),
+                width: scale(40),
+                borderRadius: scale(20),
+                marginRight: scale(10),
               }}
             />
-          ))}
-        </View>
-      )}
+            <Text style={{ fontWeight: '600', fontSize: scaleFont(14) }}>
+              {astrologerName}
+            </Text>
+          </View>
 
-      {/* CAPTION */}
-      <View
-        style={{
-          paddingHorizontal: scale(16),
-          paddingBottom: verticalScale(10),
-        }}
-      >
-        <View>
-          <Text style={{ fontSize: scaleFont(13), marginTop: 4 }}>
+          {astrologerId === userId && (
+            <Pressable onPress={() => setMenuVisible(p => !p)}>
+              <ThreeDotIcon size={22} color={COLORS.theme.gray.text} />
+            </Pressable>
+          )}
+        </View>
+
+        {/* IMAGE CAROUSEL */}
+        <FlatList
+          ref={flatListRef}
+          data={safeImages}
+          keyExtractor={(_, index) => index.toString()}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
+          renderItem={({ item, index }) => (
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => {
+                setActiveIndex(index);
+                setIsViewerVisible(true);
+              }}
+            >
+              <Image
+                source={{ uri: item }}
+                style={{
+                  width,
+                  height: verticalScale(350),
+                  resizeMode: 'cover',
+                }}
+              />
+            </TouchableOpacity>
+          )}
+        />
+
+        {/* ACTION BAR */}
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingHorizontal: scale(16),
+            paddingVertical: verticalScale(10),
+            gap: scale(20),
+          }}
+        >
+          <TouchableOpacity onPress={toggleLike} disabled={liking}>
+            {liked ? <LikeIconFilled size={26} /> : <LikeIcon size={26} />}
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setCommentVisible(true)}>
+            <CommentIcon size={26} />
+          </TouchableOpacity>
+        </View>
+
+        {/* LIKES */}
+        <View style={{ flexDirection: 'row' }}>
+          <Text
+            style={{
+              paddingHorizontal: scale(16),
+              fontWeight: '600',
+            }}
+          >
+            {likesCount} likes
+          </Text>
+          <Text
+            style={{
+              fontWeight: '600',
+            }}
+          >
+            {initialCommentCount} Comments
+          </Text>
+        </View>
+
+        {/* CAPTION */}
+        <View
+          style={{
+            paddingHorizontal: scale(16),
+            paddingBottom: verticalScale(10),
+          }}
+        >
+          <Text style={{ fontSize: scaleFont(13) }}>
             {displayText}
             {!expanded && isLong ? '…' : ''}
           </Text>
@@ -245,33 +264,13 @@ const FeedPost = ({
             </TouchableOpacity>
           )}
         </View>
-      </View>
-
-      {/* ACTION BAR */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: scale(16),
-          paddingVertical: verticalScale(10),
-          gap: scale(20),
-        }}
-      >
-        <TouchableOpacity onPress={toggleLike}>
-          {liked ? <LikeIconFilled size={26} /> : <LikeIcon size={26} />}
-        </TouchableOpacity>
-
-        <TouchableOpacity>
-          <CommentIcon size={26} />
-        </TouchableOpacity>
-      </View>
+      </Pressable>
 
       {/* FULLSCREEN IMAGE VIEWER */}
       <Modal
         isVisible={isViewerVisible}
         style={{ margin: 0 }}
         onBackdropPress={() => setIsViewerVisible(false)}
-        onBackButtonPress={() => setIsViewerVisible(false)}
       >
         <View style={{ flex: 1, backgroundColor: 'black' }}>
           <ImageViewer
@@ -279,84 +278,17 @@ const FeedPost = ({
             index={activeIndex}
             enableSwipeDown
             onSwipeDown={() => setIsViewerVisible(false)}
-            saveToLocalByLongPress={false}
-            backgroundColor="black"
           />
         </View>
       </Modal>
 
-      {/* DELETE CONFIRM MODAL */}
-      {confirmVisible && (
-        <Pressable
-          onPress={() => setConfirmVisible(false)}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.4)',
-            zIndex: 200,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Pressable
-            onPress={e => e.stopPropagation()}
-            style={{
-              width: '85%',
-              backgroundColor: COLORS.theme.white,
-              borderRadius: 12,
-              padding: scale(20),
-            }}
-          >
-            <Text
-              style={{
-                fontSize: scaleFont(16),
-                fontWeight: '600',
-                marginBottom: verticalScale(8),
-              }}
-            >
-              Delete post?
-            </Text>
-
-            <Text
-              style={{
-                fontSize: scaleFont(13),
-                color: COLORS.theme.gray.text,
-                marginBottom: verticalScale(20),
-              }}
-            >
-              This action cannot be undone.
-            </Text>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                gap: scale(16),
-              }}
-            >
-              <TouchableOpacity onPress={() => setConfirmVisible(false)}>
-                <Text style={{ fontSize: 14 }}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity disabled={isPending} onPress={confirmDelete}>
-                <Text
-                  style={{
-                    fontSize: 14,
-                    color: isPending ? '#aaa' : 'red',
-                    fontWeight: '600',
-                  }}
-                >
-                  Delete
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      )}
-    </Pressable>
+      {/* COMMENTS BOTTOM SHEET ✅ */}
+      <CommentsBottomSheet
+        visible={commentVisible}
+        onClose={() => setCommentVisible(false)}
+        postId={id}
+      />
+    </>
   );
 };
 

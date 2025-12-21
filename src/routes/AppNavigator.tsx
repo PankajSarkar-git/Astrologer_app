@@ -20,20 +20,22 @@ import ProfileEdit from '../screens/profile/pofile-edit';
 import About from '../screens/about';
 import AstrologerWallet from '../screens/wallet/wallet';
 import SplashScreen from '../screens/splash';
+import {
+  ZegoUIKitPrebuiltCallInCallScreen,
+  ZegoUIKitPrebuiltCallWaitingScreen,
+} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import { useZegoAndFCM } from '../hooks/useZego';
+import { useWebSocket } from '../hooks/use-socket-new';
+import ChatHistory from '../screens/ChatHistory/ChatHistory';
+import ChatScreen from '../screens/call&chat/chatScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   const dispatch = useDispatch();
-  const token = useSelector((state: RootState) => state.auth.token);
-
-  //  hook always called, API only runs when token exists
+  const { token } = useSelector((state: RootState) => state.auth);
   const { data, error, isError, isSuccess } = useGetMe(!!token);
-
-  // FCM should also depend on auth state
   useFcm(Boolean(token));
-
-  /* ---------- HANDLE SUCCESS ---------- */
   useEffect(() => {
     if (!isSuccess || !data) return;
 
@@ -52,7 +54,10 @@ export default function AppNavigator() {
       dispatch(logout());
     }
   }, [isError, error, dispatch]);
-
+  const { user } = useSelector((state: RootState) => state.auth);
+  useFcm(!!token);
+  useZegoAndFCM(user?.mobile, user?.name, !!token);
+  const { connect, isConnected, disconnect, send } = useWebSocket(user?.id);
   return (
     <Stack.Navigator
       initialRouteName="Splash"
@@ -63,11 +68,31 @@ export default function AppNavigator() {
         <Stack.Screen name="Login" component={Login} />
       ) : (
         <>
+          <Stack.Screen
+            options={{ headerShown: false }}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallWaitingScreen"
+            component={ZegoUIKitPrebuiltCallWaitingScreen}
+          />
+          <Stack.Screen
+            options={{ headerShown: false }}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallInCallScreen"
+            component={ZegoUIKitPrebuiltCallInCallScreen}
+          />
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="EditPost" component={EditPost} />
           <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
           <Stack.Screen name="about" component={About} />
           <Stack.Screen name="Wallet" component={AstrologerWallet} />
+          <Stack.Screen name="History" component={ChatHistory} />
+          <Stack.Screen
+            name="ChatScreen"
+            component={ChatScreen}
+            options={{
+              animation: 'slide_from_right',
+            }}
+          />
         </>
       )}
     </Stack.Navigator>
