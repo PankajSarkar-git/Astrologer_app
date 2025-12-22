@@ -28,6 +28,7 @@ import { useZegoAndFCM } from '../hooks/useZego';
 import { useWebSocket } from '../hooks/use-socket-new';
 import ChatHistory from '../screens/ChatHistory/ChatHistory';
 import ChatScreen from '../screens/call&chat/chatScreen';
+import Notification from '../screens/notification';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -93,6 +94,7 @@ export default function AppNavigator() {
               animation: 'slide_from_right',
             }}
           />
+          <Stack.Screen name="Notification" component={Notification} />
         </>
       )}
     </Stack.Navigator>

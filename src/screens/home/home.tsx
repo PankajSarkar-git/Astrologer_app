@@ -104,7 +104,9 @@ import {
 } from '../../api/hooks/useBooking';
 import { BookingCard } from './components/BookingCard';
 import { COLORS } from '../../constant/colors';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useAppDispatch } from '../../hooks/redux-hook';
+import { setOtherUser, setSession } from '../../store/reducer/session';
 
 const Home = () => {
   const {
@@ -120,12 +122,14 @@ const Home = () => {
   const { mutate: updateStatus, isPending } = useUpdateBookingStatus();
 
   const bookings = data?.pages?.flatMap(page => page.appointments || []) || [];
-
+  const navigation = useNavigation<any>();
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   };
+
+  const dispatch = useAppDispatch();
 
   return (
     <PageWithHeader scrollEnabled={false}>
@@ -177,6 +181,13 @@ const Home = () => {
             renderItem={({ item }) => (
               <BookingCard
                 item={item}
+                onStartSession={item => {
+                  if (item.sessionType === 'CHAT') {
+                    dispatch(setOtherUser(item.user));
+                    dispatch(setSession(item));
+                    navigation.navigate('ChatScreen');
+                  }
+                }}
                 onAccept={({ id }) => {
                   updateStatus({
                     id,
