@@ -38,7 +38,7 @@ export function useBookings(size: number = 10) {
       const current = lastPage.currentPage ?? 1;
       return current + 1;
     },
-    //refetchInterval: 2000,
+    refetchInterval: 2000,
     refetchIntervalInBackground: false,
   });
 }

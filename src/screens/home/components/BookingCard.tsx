@@ -200,6 +200,7 @@ import { scale, scaleFont, verticalScale } from '../../../utils/sizer';
 import { COLORS } from '../../../constant/colors';
 import { textStyle } from '../../../constant/text-style';
 import { showToast } from '../../../components/common/toast';
+import { ZegoSendCallInvitationButton } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 type BookingCardProps = {
   item: any;
   onAccept?: (payload: {
@@ -421,6 +422,31 @@ export const BookingCard = ({
                 </Text>
               </TouchableOpacity>
             </View>
+          )}
+          {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
+            <ZegoSendCallInvitationButton
+              invitees={[
+                {
+                  userID: item?.callSession?.astrologer?.mobile,
+                  userName: item?.astrologer?.name?.slice(0, 20),
+                },
+              ]}
+              isVideoCall={false}
+              resourceID={'astrosevaa'}
+            />
+          )}
+
+          {item.sessionType === 'VIDEO' && item.status === 'APPROVED' && (
+            <ZegoSendCallInvitationButton
+              invitees={[
+                {
+                  userID: item?.callSession?.astrologer?.mobile,
+                  userName: item?.astrologer?.name?.slice(0, 20),
+                },
+              ]}
+              isVideoCall={true}
+              resourceID={'astrosevaa'}
+            />
           )}
         </>
       )}

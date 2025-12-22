@@ -57,7 +57,14 @@ export default function AppNavigator() {
   }, [isError, error, dispatch]);
   const { user } = useSelector((state: RootState) => state.auth);
   useFcm(!!token);
-  useZegoAndFCM(user?.mobile, user?.name, !!token);
+  console.log(
+    user?.mobile,
+    user?.name?.slice(0, 20) || 'Guest',
+    !!token,
+    "user?.mobile, user?.name?.slice(0, 20) || 'Guest', !!token",
+  );
+
+  useZegoAndFCM(user?.mobile, user?.name?.slice(0, 20) || 'Guest', !!token);
   const { connect, isConnected, disconnect, send } = useWebSocket(user?.id);
   return (
     <Stack.Navigator
