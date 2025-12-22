@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -11,58 +11,76 @@ import {
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useQueryClient } from '@tanstack/react-query';
 
-import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
+import { useAppSelector } from '../../hooks/redux-hook';
 import { useWebSocket } from '../../hooks/use-socket-new';
 import { Message } from '../../utils/types';
-import { addMessage, clearSession } from '../../store/reducer/session';
+import { useChatMessages } from '../../api/hooks/useSession';
+
 import { COLORS } from '../../constant/colors';
 import { scale, verticalScale, moderateScale } from '../../utils/sizer';
 import SendIcon from '../../assets/icon/sendIcon';
 import CameraIcon from '../../assets/icon/camera-icon';
-
-const PAGE_SIZE = 15;
+import useKeyboardStatus from '../../hooks/use-keyboard';
 
 const ChatScreen = () => {
   const navigation = useNavigation<any>();
-  const dispatch = useAppDispatch();
-
+  const queryClient = useQueryClient();
+  const isKeyboardOpen = useKeyboardStatus();
   const userId = useAppSelector(s => s.auth.user.id);
   const session = useAppSelector(s => s.session.session);
-  const messages = useAppSelector(s => s.session.messages);
   const otherUser = useAppSelector(s => s.session.otherUser);
 
   const { subscribe, send, unsubscribe } = useWebSocket(userId);
-
   const [input, setInput] = useState('');
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
 
-  const flatListRef = useRef<FlatList<Message>>(null);
+  /* ================= CHAT HISTORY (REACT QUERY) ================= */
+  const PAGE_SIZE = 15;
+  const chatQueryKey = `/chat/${session?.id}?size=${PAGE_SIZE}`;
 
-  /* ---------------- SOCKET SUBSCRIBE ---------------- */
+  const chatQuery = `/${session?.id}`;
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useChatMessages(chatQuery, !!session?.id);
+
+  /* ================= FLATTEN + NORMALIZE ================= */
+  const messages: Message[] = useMemo(() => {
+    if (!data?.pages) return [];
+
+    return data.pages.flatMap(page => page.messages).reverse(); // REQUIRED for inverted FlatList
+  }, [data]);
+
+  /* ================= SOCKET (NEW MESSAGES) ================= */
 
   useEffect(() => {
-    if (!session) return;
+    if (!session?.id) return;
 
-    const msgSub = subscribe(`/topic/chat/${userId}/messages`, msg => {
+    const sub = subscribe(`/topic/chat/${userId}/messages`, msg => {
       try {
-        const data = JSON.parse(msg.body);
-        dispatch(addMessage(data));
+        const newMsg: Message = JSON.parse(msg.body);
+
+        queryClient.setQueryData(
+          ['chat-messages', chatQueryKey],
+          (old: any) => {
+            if (!old) return old;
+
+            old.pages[0].messages.unshift(newMsg);
+            return { ...old };
+          },
+        );
       } catch {}
     });
 
     return () => {
       unsubscribe(`/topic/chat/${userId}/messages`);
     };
-  }, [session]);
+  }, [session?.id]);
 
-  /* ---------------- SEND MESSAGE ---------------- */
+  /* ================= SEND MESSAGE ================= */
 
   const handleSend = () => {
     if (!input.trim() || !session) return;
-
     const msg: Message = {
       senderId: userId,
       receiverId: otherUser?.id!,
@@ -71,32 +89,16 @@ const ChatScreen = () => {
       type: 'TEXT',
       timestamp: new Date(),
     };
-
     send('/app/chat.send', {}, JSON.stringify(msg));
-    dispatch(addMessage(msg));
+    queryClient.setQueryData(['chat-messages', chatQueryKey], (old: any) => {
+      if (!old) return old;
+      old.pages[0].messages.unshift(msg);
+      return { ...old };
+    });
     setInput('');
   };
 
-  /* ---------------- LOAD MORE ---------------- */
-
-  const loadMore = async () => {
-    if (loadingMore || !hasMore || !session) return;
-    setLoadingMore(true);
-
-    // call your API here if needed
-    setPage(p => p + 1);
-    setLoadingMore(false);
-  };
-
-  /* ---------------- CLEANUP ---------------- */
-
-  useEffect(() => {
-    return () => {
-      dispatch(clearSession());
-    };
-  }, []);
-
-  /* ---------------- RENDER MESSAGE ---------------- */
+  /* ================= RENDER MESSAGE ================= */
 
   const renderItem = ({ item }: { item: Message }) => {
     const isMine = item.senderId === userId;
@@ -124,18 +126,21 @@ const ChatScreen = () => {
 
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={'height'}
+        keyboardVerticalOffset={isKeyboardOpen ? 32 : 0}
       >
-        {/* CHAT LIST */}
         <FlatList
-          ref={flatListRef}
           data={messages}
           inverted
           keyExtractor={(item, i) => `${item.timestamp}-${i}`}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
-          onEndReached={loadMore}
-          onEndReachedThreshold={0.2}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.1}
         />
 
         {/* INPUT */}
@@ -163,13 +168,10 @@ const ChatScreen = () => {
 
 export default ChatScreen;
 
-/* ---------------- STYLES ---------------- */
+/* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.theme.white,
-  },
+  root: { flex: 1, backgroundColor: COLORS.theme.white },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -177,20 +179,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: COLORS.theme.gray.light,
   },
-  back: {
-    fontSize: 28,
-    marginRight: scale(10),
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  container: {
-    flex: 1,
-  },
-  list: {
-    padding: scale(12),
-  },
+  back: { fontSize: 28, marginRight: scale(10) },
+  title: { fontSize: 18, fontWeight: '600' },
+  container: { flex: 1 },
+  list: { padding: scale(12) },
   bubble: {
     maxWidth: '75%',
     padding: scale(10),
@@ -205,14 +197,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: COLORS.theme.gray.light,
   },
-  text: {
-    color: COLORS.theme.black,
-  },
-  image: {
-    width: 200,
-    height: 200,
-    borderRadius: 8,
-  },
+  text: { color: COLORS.theme.black },
+  image: { width: 200, height: 200, borderRadius: 8 },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -202,6 +202,7 @@ export interface SessionState {
 }
 
 export interface Message {
+  // id: string;
   senderId: string;
   receiverId: string;
   sessionId: string;

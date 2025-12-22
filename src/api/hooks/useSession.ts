@@ -19,7 +19,7 @@ export function useChatMessages(query: string, enabled = true) {
     initialPageParam: 1,
 
     queryFn: ({ pageParam }) =>
-      SessionService.getChatMessages(`${query}&page=${pageParam}`),
+      SessionService.getChatMessages(`${query}?page=${pageParam}&size=15`),
 
     getNextPageParam: lastPage => {
       if (!lastPage || lastPage.last) return undefined;

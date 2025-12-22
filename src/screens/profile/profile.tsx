@@ -112,7 +112,7 @@ const ProfilePage = () => {
               label="Chat Price"
               value={
                 profileData?.pricePerMinuteChat !== null
-                  ? `₹${profileData.pricePerMinuteChat}/min`
+                  ? `₹${profileData?.pricePerMinuteChat}/min`
                   : '__'
               }
             />
@@ -121,7 +121,7 @@ const ProfilePage = () => {
               label="Voice Call Price"
               value={
                 profileData?.pricePerMinuteVoice !== null
-                  ? `₹${profileData.pricePerMinuteVoice}/min`
+                  ? `₹${profileData?.pricePerMinuteVoice}/min`
                   : '__'
               }
             />
@@ -130,7 +130,7 @@ const ProfilePage = () => {
               label="Video Call Price"
               value={
                 profileData?.pricePerMinuteVideo !== null
-                  ? `₹${profileData.pricePerMinuteVideo}/min`
+                  ? `₹${profileData?.pricePerMinuteVideo}/min`
                   : '__'
               }
             />
