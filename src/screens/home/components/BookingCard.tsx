@@ -343,12 +343,6 @@ export const BookingCard = ({
               marginTop: verticalScale(12),
             }}
           >
-<<<<<<< HEAD
-            <Text style={{ color: '#fff', fontSize: scaleFont(13) }}>
-              {sessionLabel}
-            </Text>
-          </TouchableOpacity>
-=======
             <TouchableOpacity
               onPress={() => onStartSession?.(item)}
               style={{
@@ -429,18 +423,12 @@ export const BookingCard = ({
               </TouchableOpacity>
             </View>
           )}
->>>>>>> ffdab3a7f74c9c9fe5003cbfd68b17d0d48c0c63
           {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
             <ZegoSendCallInvitationButton
               invitees={[
                 {
-<<<<<<< HEAD
                   userID: item?.callSession?.user?.mobile,
-                  userName: item?.callSession?.user?.name?.slice(0, 20),
-=======
-                  userID: item?.callSession?.astrologer?.mobile,
-                  userName: item?.astrologer?.name?.slice(0, 20),
->>>>>>> ffdab3a7f74c9c9fe5003cbfd68b17d0d48c0c63
+                  userName: item?.user?.name?.slice(0, 20),
                 },
               ]}
               isVideoCall={false}
@@ -452,24 +440,15 @@ export const BookingCard = ({
             <ZegoSendCallInvitationButton
               invitees={[
                 {
-<<<<<<< HEAD
                   userID: item?.callSession?.user?.mobile,
-                  userName: item?.callSession?.user?.name?.slice(0, 20),
-=======
-                  userID: item?.callSession?.astrologer?.mobile,
-                  userName: item?.astrologer?.name?.slice(0, 20),
->>>>>>> ffdab3a7f74c9c9fe5003cbfd68b17d0d48c0c63
+                  userName: item?.user?.name?.slice(0, 20),
                 },
               ]}
               isVideoCall={true}
               resourceID={'astrosevaa'}
             />
           )}
-<<<<<<< HEAD
-        </View>
-=======
         </>
->>>>>>> ffdab3a7f74c9c9fe5003cbfd68b17d0d48c0c63
       )}
     </View>
   );

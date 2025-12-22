@@ -28,11 +28,8 @@ import { useZegoAndFCM } from '../hooks/useZego';
 import { useWebSocket } from '../hooks/use-socket-new';
 import ChatHistory from '../screens/ChatHistory/ChatHistory';
 import ChatScreen from '../screens/call&chat/chatScreen';
-<<<<<<< HEAD
 import { askCallPermissions } from '../utils/askPermission';
-=======
 import Notification from '../screens/notification';
->>>>>>> ffdab3a7f74c9c9fe5003cbfd68b17d0d48c0c63
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -61,19 +58,8 @@ export default function AppNavigator() {
   }, [isError, error, dispatch]);
   const { user } = useSelector((state: RootState) => state.auth);
   useFcm(!!token);
-<<<<<<< HEAD
   askCallPermissions();
   useZegoAndFCM(user?.mobile, user?.name, !!token);
-=======
-  console.log(
-    user?.mobile,
-    user?.name?.slice(0, 20) || 'Guest',
-    !!token,
-    "user?.mobile, user?.name?.slice(0, 20) || 'Guest', !!token",
-  );
-
-  useZegoAndFCM(user?.mobile, user?.name?.slice(0, 20) || 'Guest', !!token);
->>>>>>> ffdab3a7f74c9c9fe5003cbfd68b17d0d48c0c63
   const { connect, isConnected, disconnect, send } = useWebSocket(user?.id);
   return (
     <Stack.Navigator
