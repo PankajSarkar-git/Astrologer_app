@@ -66,7 +66,7 @@ const ChatHistory = () => {
   /* ---------------- RENDERERS ---------------- */
 
   const renderChatItem = ({ item }: { item: ChatSession }) => {
-    const otherUser: UserDetail = role === 'USER' ? item.astrologer : item.user;
+    const otherUser: UserDetail = item.user;
 
     return (
       <TouchableOpacity

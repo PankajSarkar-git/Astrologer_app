@@ -13,7 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { useAppSelector } from '../../hooks/redux-hook';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
 import { useWebSocket } from '../../hooks/use-socket-new';
 import { Message } from '../../utils/types';
 import { useChatMessages } from '../../api/hooks/useSession';
@@ -23,6 +23,14 @@ import { scale, verticalScale, moderateScale } from '../../utils/sizer';
 import SendIcon from '../../assets/icon/sendIcon';
 import CameraIcon from '../../assets/icon/camera-icon';
 import useKeyboardStatus from '../../hooks/use-keyboard';
+import { StompSubscription } from '@stomp/stompjs';
+import { decodeMessageBody } from '../../utils/utils';
+import {
+  addMessage,
+  prependMessages,
+  setMessages,
+  setSession,
+} from '../../store/reducer/session';
 
 const ChatScreen = () => {
   const navigation = useNavigation<any>();
@@ -31,9 +39,12 @@ const ChatScreen = () => {
   const userId = useAppSelector(s => s.auth.user.id);
   const session = useAppSelector(s => s.session.session);
   const otherUser = useAppSelector(s => s.session.otherUser);
+  const otherUserId = otherUser?.id;
+  const [otherUserTyping, setOtherUserTyping] = useState(false);
 
   const { subscribe, send, unsubscribe } = useWebSocket(userId);
   const [input, setInput] = useState('');
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   /* ================= CHAT HISTORY (REACT QUERY) ================= */
   const PAGE_SIZE = 15;
@@ -45,39 +56,150 @@ const ChatScreen = () => {
     useChatMessages(chatQuery, !!session?.id);
 
   /* ================= FLATTEN + NORMALIZE ================= */
-  const messages: Message[] = useMemo(() => {
-    if (!data?.pages) return [];
+  // const messages: Message[] = useMemo(() => {
+  //   if (!data?.pages) return [];
 
-    return data.pages.flatMap(page => page.messages).reverse(); // REQUIRED for inverted FlatList
-  }, [data]);
+  //   return data.pages.flatMap(page => page.messages).reverse(); // REQUIRED for inverted FlatList
+  // }, [data]);
+
+  const messages = useAppSelector(state => state.session.messages);
+  const dispatch = useAppDispatch();
 
   /* ================= SOCKET (NEW MESSAGES) ================= */
 
+  // useEffect(() => {
+  //   if (!session?.id) return;
+
+  //   const sub = subscribe(`/topic/chat/${userId}/messages`, msg => {
+  //     try {
+  //       const newMsg: Message = JSON.parse(msg.body);
+
+  //       queryClient.setQueryData(
+  //         ['chat-messages', chatQueryKey],
+  //         (old: any) => {
+  //           if (!old) return old;
+
+  //           old.pages[0].messages.unshift(newMsg);
+  //           return { ...old };
+  //         },
+  //       );
+  //     } catch {}
+  //   });
+
+  //   return () => {
+  //     unsubscribe(`/topic/chat/${userId}/messages`);
+  //   };
+  // }, [session?.id]);
+
   useEffect(() => {
-    if (!session?.id) return;
+    if (!data?.pages) return;
 
-    const sub = subscribe(`/topic/chat/${userId}/messages`, msg => {
-      try {
-        const newMsg: Message = JSON.parse(msg.body);
+    const allMessages = data.pages.flatMap(page => page.messages).reverse(); // for inverted FlatList
 
-        queryClient.setQueryData(
-          ['chat-messages', chatQueryKey],
-          (old: any) => {
-            if (!old) return old;
+    dispatch(setMessages(allMessages));
+  }, [data]);
 
-            old.pages[0].messages.unshift(newMsg);
-            return { ...old };
-          },
-        );
-      } catch {}
-    });
+  useEffect(() => {
+    if (!data?.pages?.length) return;
+
+    const lastPage = data.pages[data.pages.length - 1];
+    if (!lastPage?.messages?.length) return;
+
+    const olderMessages = [...lastPage.messages].reverse();
+    dispatch(prependMessages(olderMessages));
+  }, [isFetchingNextPage]);
+
+  const messageSubDest = `/topic/chat/${userId}/messages`;
+  const typingSubDest = `/topic/chat/${userId}/typing`;
+
+  const chatEndDest = `/topic/chat/${session?.id}`;
+
+  useEffect(() => {
+    let chatTimerSub: StompSubscription | undefined;
+    let chatEndSub: StompSubscription | undefined;
+    let chatMessage: StompSubscription | undefined;
+    let typingSub: StompSubscription | undefined;
+
+    if (session && session.status !== 'ENDED') {
+      chatMessage = subscribe(messageSubDest, msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          dispatch(addMessage(data));
+        } catch (err) {
+          console.error('Failed to parse chat message:', err);
+        }
+      });
+      typingSub = subscribe(typingSubDest, msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          if (data.senderId === otherUserId) {
+            setOtherUserTyping(data.typing);
+          }
+          console.log(JSON.parse(decodeMessageBody(msg)));
+        } catch (err) {
+          console.error('Failed to parse chat typing:', err);
+        }
+      });
+
+      chatEndSub = subscribe(chatEndDest, msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          if (data.status === 'ended') {
+            dispatch(
+              setSession({
+                ...session,
+                status: data.status === 'ended' ? 'ENDED' : 'ACTIVE',
+              }),
+            );
+          }
+        } catch (err) {
+          console.error('Failed to parse chat end message:', err);
+        }
+      });
+    }
 
     return () => {
-      unsubscribe(`/topic/chat/${userId}/messages`);
+      chatEndSub && unsubscribe(chatEndDest);
+      chatMessage && unsubscribe(messageSubDest);
+      typingSub && unsubscribe(typingSubDest);
     };
-  }, [session?.id]);
+  }, [session, subscribe]);
 
   /* ================= SEND MESSAGE ================= */
+
+  const handleInputChange = (text: string) => {
+    setInput(text);
+    if (!session) return;
+
+    send(
+      `/app/chat.typing`,
+      {},
+      JSON.stringify({
+        senderId: userId,
+        receiverId: otherUserId,
+        sessionId: session.id,
+        typing: true,
+      }),
+    );
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      send(
+        `/app/chat.typing`,
+        {},
+        JSON.stringify({
+          senderId: userId,
+          receiverId: otherUserId,
+          sessionId: session.id,
+          typing: false,
+        }),
+      );
+      typingTimeoutRef.current = null;
+    }, 1500);
+  };
 
   const handleSend = () => {
     if (!input.trim() || !session) return;
@@ -90,12 +212,27 @@ const ChatScreen = () => {
       timestamp: new Date(),
     };
     send('/app/chat.send', {}, JSON.stringify(msg));
-    queryClient.setQueryData(['chat-messages', chatQueryKey], (old: any) => {
-      if (!old) return old;
-      old.pages[0].messages.unshift(msg);
-      return { ...old };
-    });
+    // queryClient.setQueryData(['chat-messages', chatQueryKey], (old: any) => {
+    //   if (!old) return old;
+    //   old.pages[0].messages.unshift(msg);
+    //   return { ...old };
+    // });
+    dispatch(addMessage(msg));
     setInput('');
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+    send(
+      `/app/chat.typing`,
+      {},
+      JSON.stringify({
+        senderId: userId,
+        receiverId: otherUserId,
+        typing: false,
+      }),
+    );
   };
 
   /* ================= RENDER MESSAGE ================= */
@@ -151,7 +288,7 @@ const ChatScreen = () => {
 
           <TextInput
             value={input}
-            onChangeText={setInput}
+            onChangeText={handleInputChange}
             placeholder="Type a message"
             style={styles.input}
             editable={session?.status === 'ACTIVE'}
