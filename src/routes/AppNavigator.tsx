@@ -28,6 +28,7 @@ import { useZegoAndFCM } from '../hooks/useZego';
 import { useWebSocket } from '../hooks/use-socket-new';
 import ChatHistory from '../screens/ChatHistory/ChatHistory';
 import ChatScreen from '../screens/call&chat/chatScreen';
+import { askCallPermissions } from '../utils/askPermission';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -56,6 +57,7 @@ export default function AppNavigator() {
   }, [isError, error, dispatch]);
   const { user } = useSelector((state: RootState) => state.auth);
   useFcm(!!token);
+  askCallPermissions();
   useZegoAndFCM(user?.mobile, user?.name, !!token);
   const { connect, isConnected, disconnect, send } = useWebSocket(user?.id);
   return (

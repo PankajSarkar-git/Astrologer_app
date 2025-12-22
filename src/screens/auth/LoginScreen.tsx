@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { AuthService } from '../../api/services/auth.service';
 import { setUser, setAuthentication } from '../../store/reducer/auth';
+import { askCallPermissions } from '../../utils/askPermission';
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -31,6 +32,7 @@ const LoginScreen = () => {
       // Save user & token to Redux
       dispatch(setUser(res.user));
       dispatch(setAuthentication(true));
+      askCallPermissions();
 
       navigation.navigate('Home' as never);
     } catch (err: any) {

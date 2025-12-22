@@ -54,10 +54,10 @@ export function useZegoAndFCM(
           userName,
           [ZIM, ZPNs],
           {
-            ringtoneConfig: {
-              incomingCallFileName: 'zego_incoming.mp3',
-              outgoingCallFileName: 'zego_outgoing.mp3',
-            },
+            // ringtoneConfig: {
+            //   incomingCallFileName: 'zego_incoming.mp3',
+            //   outgoingCallFileName: 'zego_outgoing.mp3',
+            // },
             androidNotificationConfig: {
               channelID: 'astrosevaa',
               channelName: 'astrosevaa',

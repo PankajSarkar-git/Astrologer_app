@@ -94,7 +94,7 @@ const ChatScreen = () => {
   useEffect(() => {
     if (!data?.pages) return;
 
-    const allMessages = data.pages.flatMap(page => page.messages).reverse(); // for inverted FlatList
+    const allMessages = data.pages.flatMap(page => page.messages); // for inverted FlatList
 
     dispatch(setMessages(allMessages));
   }, [data]);
@@ -105,7 +105,7 @@ const ChatScreen = () => {
     const lastPage = data.pages[data.pages.length - 1];
     if (!lastPage?.messages?.length) return;
 
-    const olderMessages = [...lastPage.messages].reverse();
+    const olderMessages = [...lastPage.messages];
     dispatch(prependMessages(olderMessages));
   }, [isFetchingNextPage]);
 
@@ -217,6 +217,7 @@ const ChatScreen = () => {
     //   old.pages[0].messages.unshift(msg);
     //   return { ...old };
     // });
+    console.log('mesage sent------------');
     dispatch(addMessage(msg));
     setInput('');
 

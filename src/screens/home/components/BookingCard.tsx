@@ -183,13 +183,33 @@ export const BookingCard = ({
               {sessionLabel}
             </Text>
           </TouchableOpacity>
+          {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
+            <ZegoSendCallInvitationButton
+              invitees={[
+                {
+                  userID: item?.callSession?.user?.mobile,
+                  userName: item?.callSession?.user?.name?.slice(0, 20),
+                },
+              ]}
+              isVideoCall={false}
+              resourceID={'astrosevaa'}
+            />
+          )}
+
+          {item.sessionType === 'VIDEO' && item.status === 'APPROVED' && (
+            <ZegoSendCallInvitationButton
+              invitees={[
+                {
+                  userID: item?.callSession?.user?.mobile,
+                  userName: item?.callSession?.user?.name?.slice(0, 20),
+                },
+              ]}
+              isVideoCall={true}
+              resourceID={'astrosevaa'}
+            />
+          )}
         </View>
       )}
-      {/* <ZegoSendCallInvitationButton
-        invitees={[{ userID: item.user.mobile, userName: item.user.name }]}
-        isVideoCall={false}
-        resourceID={'zego_call'}
-      /> */}
     </View>
   );
 };
