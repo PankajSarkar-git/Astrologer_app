@@ -129,12 +129,24 @@ export default function useFcm(isAuthenticated: boolean) {
           );
         }
 
+        async function createNotificationChannel() {
+          await notifee.createChannel({
+            id: 'high_importance_channel',
+            name: 'High Importance Notifications',
+            importance: AndroidImportance.HIGH,
+            sound: 'notification_sound',
+            vibration: true,
+          });
+        }
+
+        createNotificationChannel();
+
         // 2. Create notification channel (MANDATORY)
-        await notifee.createChannel({
-          id: 'default',
-          name: 'Default',
-          importance: AndroidImportance.HIGH,
-        });
+        // await notifee.createChannel({
+        //   id: 'default',
+        //   name: 'Default',
+        //   importance: AndroidImportance.HIGH,
+        // });
 
         // 3. Get FCM token
         const token = await messaging().getToken();
