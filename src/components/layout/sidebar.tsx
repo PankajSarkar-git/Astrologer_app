@@ -69,7 +69,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
     // },
     { title: 'Wallet', href: 'Wallet', icon: <WalletIcon size={20} /> },
     {
-      title: 'History',
+      title: 'Call & Chat History',
       href: 'History',
       icon: <HistoryIcon size={20} />,
     },

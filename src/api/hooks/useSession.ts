@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
 import { SessionService } from '../services/session.service';
 
 /* ---------------- CHAT HISTORY ---------------- */
@@ -27,6 +27,12 @@ export function useChatMessages(query: string, enabled = true) {
     },
 
     enabled,
+
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
   });
 }
 
@@ -37,5 +43,12 @@ export function useCallHistory(query: string, enabled = true) {
     queryKey: ['call-history', query],
     queryFn: () => SessionService.getCallHistory(query),
     enabled,
+  });
+}
+
+export function useUploadChatImage() {
+  return useMutation({
+    mutationFn: (formData: FormData) =>
+      SessionService.uploadChatImage(formData),
   });
 }
