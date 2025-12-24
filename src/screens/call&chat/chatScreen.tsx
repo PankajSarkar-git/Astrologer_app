@@ -69,6 +69,7 @@ const ChatScreen = () => {
 
   const messages = useAppSelector(state => state.session.messages);
   const dispatch = useAppDispatch();
+  console.log(messages, 'messages');
 
   /* ================= SOCKET (NEW MESSAGES) ================= */
 
@@ -95,13 +96,15 @@ const ChatScreen = () => {
   //     unsubscribe(`/topic/chat/${userId}/messages`);
   //   };
   // }, [session?.id]);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (!data?.pages) return;
+    if (!data?.pages || initializedRef.current) return;
 
-    const allMessages = data.pages.flatMap(page => page.messages); // for inverted FlatList
+    const allMessages = data.pages.flatMap(page => page.messages); // important for inverted list
 
     dispatch(setMessages(allMessages));
+    initializedRef.current = true;
   }, [data]);
 
   useEffect(() => {

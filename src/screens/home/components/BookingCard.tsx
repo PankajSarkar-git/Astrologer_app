@@ -303,12 +303,13 @@ export const BookingCard = ({
               onReject?.({ id: item.id, status: 'CANCELLED', otp: null })
             }
             style={{
-              paddingVertical: verticalScale(6),
+              paddingVertical: verticalScale(10),
               paddingHorizontal: scale(14),
               borderRadius: scale(10),
               borderWidth: 1,
               borderColor: '#F44336',
               marginRight: scale(8),
+              justifyContent: 'center',
             }}
           >
             <Text style={{ fontSize: scaleFont(12), color: '#F44336' }}>
@@ -321,10 +322,11 @@ export const BookingCard = ({
               onAccept?.({ id: item.id, status: 'APPROVED', otp: null })
             }
             style={{
-              paddingVertical: verticalScale(6),
+              paddingVertical: verticalScale(10),
               paddingHorizontal: scale(14),
               borderRadius: scale(10),
               backgroundColor: '#4CAF50',
+              justifyContent: 'center',
             }}
           >
             <Text style={{ fontSize: scaleFont(12), color: '#fff' }}>
@@ -343,20 +345,51 @@ export const BookingCard = ({
               marginTop: verticalScale(12),
             }}
           >
-            <TouchableOpacity
-              onPress={() => onStartSession?.(item)}
-              style={{
-                paddingVertical: verticalScale(6),
-                paddingHorizontal: scale(16),
-                borderRadius: scale(10),
-                backgroundColor: '#42A5F5',
-                marginRight: scale(8),
-              }}
-            >
-              <Text style={{ color: '#fff', fontSize: scaleFont(13) }}>
-                {sessionLabel}
-              </Text>
-            </TouchableOpacity>
+            {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
+              <View style={{ paddingHorizontal: verticalScale(20) }}>
+                <ZegoSendCallInvitationButton
+                  invitees={[
+                    {
+                      userID: item?.callSession?.user?.mobile,
+                      userName: item?.user?.name?.slice(0, 20),
+                    },
+                  ]}
+                  isVideoCall={false}
+                  resourceID={'astrosevaa'}
+                />
+              </View>
+            )}
+
+            {item.sessionType === 'VIDEO' && item.status === 'APPROVED' && (
+              <View style={{ paddingHorizontal: verticalScale(20) }}>
+                <ZegoSendCallInvitationButton
+                  invitees={[
+                    {
+                      userID: item?.callSession?.user?.mobile,
+                      userName: item?.user?.name?.slice(0, 20),
+                    },
+                  ]}
+                  isVideoCall={true}
+                  resourceID={'astrosevaa'}
+                />
+              </View>
+            )}
+            {item.sessionType === 'CHAT' && (
+              <TouchableOpacity
+                onPress={() => onStartSession?.(item)}
+                style={{
+                  paddingVertical: verticalScale(10),
+                  paddingHorizontal: scale(16),
+                  borderRadius: scale(10),
+                  backgroundColor: '#42A5F5',
+                  marginRight: scale(8),
+                }}
+              >
+                <Text style={{ color: '#fff', fontSize: scaleFont(13) }}>
+                  {sessionLabel}
+                </Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               onPress={() => setShowOtpInput(prev => !prev)}
@@ -365,6 +398,7 @@ export const BookingCard = ({
                 paddingHorizontal: scale(16),
                 borderRadius: scale(10),
                 backgroundColor: '#4CAF50',
+                justifyContent: 'center',
               }}
             >
               <Text style={{ color: '#fff', fontSize: scaleFont(13) }}>
@@ -411,7 +445,7 @@ export const BookingCard = ({
                 style={{
                   marginTop: verticalScale(8),
                   alignSelf: 'flex-end',
-                  paddingVertical: verticalScale(6),
+                  paddingVertical: verticalScale(10),
                   paddingHorizontal: scale(16),
                   borderRadius: scale(10),
                   backgroundColor: '#4CAF50',
@@ -422,31 +456,6 @@ export const BookingCard = ({
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
-          {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
-            <ZegoSendCallInvitationButton
-              invitees={[
-                {
-                  userID: item?.callSession?.user?.mobile,
-                  userName: item?.user?.name?.slice(0, 20),
-                },
-              ]}
-              isVideoCall={false}
-              resourceID={'astrosevaa'}
-            />
-          )}
-
-          {item.sessionType === 'VIDEO' && item.status === 'APPROVED' && (
-            <ZegoSendCallInvitationButton
-              invitees={[
-                {
-                  userID: item?.callSession?.user?.mobile,
-                  userName: item?.user?.name?.slice(0, 20),
-                },
-              ]}
-              isVideoCall={true}
-              resourceID={'astrosevaa'}
-            />
           )}
         </>
       )}

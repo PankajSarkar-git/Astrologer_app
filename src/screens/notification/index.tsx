@@ -106,7 +106,7 @@ const Notification = () => {
         const chatId = item.metadata?.chatId;
         if (!chatId) return;
 
-        navigation.navigate('ChatScreen', { chatId });
+        navigation.navigate('History');
         break;
       }
 

@@ -35,9 +35,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   const dispatch = useDispatch();
-  const { token } = useSelector((state: RootState) => state.auth);
+  const { token, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth,
+  );
   const { data, error, isError, isSuccess } = useGetMe(!!token);
-  useFcm(Boolean(token));
+  useFcm(isAuthenticated);
   useEffect(() => {
     if (!isSuccess || !data) return;
 
@@ -57,9 +59,19 @@ export default function AppNavigator() {
     }
   }, [isError, error, dispatch]);
   const { user } = useSelector((state: RootState) => state.auth);
-  useFcm(!!token);
+  useFcm(isAuthenticated);
   askCallPermissions();
-  useZegoAndFCM(user?.mobile, user?.name, !!token);
+  console.log(
+    user?.mobile,
+    user?.name?.slice(0, 20),
+    'user?.mobile, user?.name',
+  );
+
+  useZegoAndFCM(
+    user?.mobile,
+    user?.name?.slice(0, 20) || 'Guest',
+    isAuthenticated,
+  );
   const { connect, isConnected, disconnect, send } = useWebSocket(user?.id);
   return (
     <Stack.Navigator

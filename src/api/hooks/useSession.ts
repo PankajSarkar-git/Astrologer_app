@@ -1,17 +1,24 @@
 import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
 import { SessionService } from '../services/session.service';
 
-/* ---------------- CHAT HISTORY ---------------- */
+/* ---------------- CHAT HISTORY (NO CACHE) ---------------- */
 
 export function useChatHistory(query: string, enabled = true) {
   return useQuery({
     queryKey: ['chat-history', query],
     queryFn: () => SessionService.getChatHistory(query),
     enabled,
+
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+    retry: false,
   });
 }
 
-/* ---------------- CHAT MESSAGES (PAGINATED) ---------------- */
+/* ---------------- CHAT MESSAGES (PAGINATED, NO RETENTION) ---------------- */
 
 export function useChatMessages(query: string, enabled = true) {
   return useInfiniteQuery({
@@ -30,25 +37,36 @@ export function useChatMessages(query: string, enabled = true) {
 
     staleTime: 0,
     gcTime: 0,
-    refetchOnMount: true,
+    refetchOnMount: 'always',
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
+    retry: false,
   });
 }
 
-/* ---------------- CALL HISTORY ---------------- */
+/* ---------------- CALL HISTORY (NO CACHE) ---------------- */
 
 export function useCallHistory(query: string, enabled = true) {
   return useQuery({
     queryKey: ['call-history', query],
     queryFn: () => SessionService.getCallHistory(query),
     enabled,
+
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+    retry: false,
   });
 }
+
+/* ---------------- UPLOAD IMAGE ---------------- */
 
 export function useUploadChatImage() {
   return useMutation({
     mutationFn: (formData: FormData) =>
       SessionService.uploadChatImage(formData),
+    retry: false,
   });
 }

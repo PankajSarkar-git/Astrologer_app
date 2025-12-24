@@ -183,8 +183,8 @@ const Home = () => {
                 item={item}
                 onStartSession={item => {
                   if (item.sessionType === 'CHAT') {
-                    dispatch(setOtherUser(item.user));
-                    dispatch(setSession(item));
+                    dispatch(setOtherUser(item.chatSession.user));
+                    dispatch(setSession(item.chatSession));
                     navigation.navigate('ChatScreen');
                   }
                 }}
