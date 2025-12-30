@@ -38,7 +38,7 @@ export function useBookings(size: number = 10) {
       const current = lastPage.currentPage ?? 1;
       return current + 1;
     },
-    refetchInterval: 2000,
+    refetchInterval: 4000,
     refetchIntervalInBackground: false,
   });
 }
@@ -46,15 +46,8 @@ export function useUpdateBookingStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      status,
-      otp = null,
-    }: {
-      id: string;
-      status: string;
-      otp?: number | null;
-    }) => BookingService.updateStatus(id, { status, otp } as any),
+    mutationFn: async ({ id, status }: { id: string; status: string }) =>
+      BookingService.updateStatus(id, { status } as any),
 
     onSuccess: res => {
       showToast({

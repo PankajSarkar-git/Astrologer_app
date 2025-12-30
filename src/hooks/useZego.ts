@@ -3,9 +3,9 @@ import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn
 import * as ZIM from 'zego-zim-react-native';
 import * as ZPNs from 'zego-zpns-react-native';
 
-const appID = 2143779193;
+const appID = 1553526806;
 const appSign =
-  'ea994b83474dccbe389acf9387f7420520799fb45f881119e8e092d90a1d923e';
+  'b985f8cb84adfc6ddc1d056344e456aca54d35191a800fa5dab99e1f11304569';
 
 export function useZegoAndFCM(
   userId: string | undefined,

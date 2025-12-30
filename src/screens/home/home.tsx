@@ -192,14 +192,18 @@ const Home = () => {
                   updateStatus({
                     id,
                     status: 'APPROVED',
-                    otp: null,
+                  });
+                }}
+                onComplete={({ id }) => {
+                  updateStatus({
+                    id,
+                    status: 'COMPLETED',
                   });
                 }}
                 onReject={({ id }) => {
                   updateStatus({
                     id,
                     status: 'CANCELLED',
-                    otp: null,
                   });
                 }}
               />
