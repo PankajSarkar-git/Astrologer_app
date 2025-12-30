@@ -11,10 +11,29 @@ import AppNavigator from './src/routes/AppNavigator';
 import { Provider } from 'react-redux';
 import Toast from './src/components/common/toast';
 import { ZegoCallInvitationDialog } from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import { navigationRef } from './src/hooks/navigation';
+import { useEffect } from 'react';
+import notifee, { AndroidImportance } from '@notifee/react-native';
+
 Object.assign(globalThis, encoding);
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+
+  async function createNotificationChannel() {
+    await notifee.createChannel({
+      id: 'high_importance_channel',
+      name: 'High Importance Notifications',
+      importance: AndroidImportance.HIGH,
+      sound: 'notification_sound',
+      vibration: true,
+    });
+  }
+
+  // Call this once when app starts
+  useEffect(() => {
+    createNotificationChannel();
+  }, []);
 
   return (
     <Provider store={store}>
@@ -25,7 +44,7 @@ function App() {
               barStyle={isDarkMode ? 'light-content' : 'dark-content'}
             />
             <QueryClientProvider client={queryClient}>
-              <NavigationContainer>
+              <NavigationContainer ref={navigationRef}>
                 <ZegoCallInvitationDialog />
                 <AppNavigator />
               </NavigationContainer>

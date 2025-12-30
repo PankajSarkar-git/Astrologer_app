@@ -16,14 +16,14 @@ export const handleNotificationNavigation = (data: any) => {
 
     case 'POST_CREATED':
       navigate('MainTabs', {
-        screen: 'Feeds',
+        screen: 'Feed',
       });
       break;
 
     case 'CHAT_MESSAGE':
       console.log('CHAT_MESSAGE-----------------');
-
       navigate('ChatScreen');
+      console.log('CHAT_MESSAGE navigated-----------------');
       break;
 
     default:

@@ -13,29 +13,15 @@ import { COLORS } from '../../constant/colors';
 
 const { height, width } = Dimensions.get('window');
 
-export default function SplashScreen() {
+export default function SplashScreen({
+  toggleLoading,
+}: {
+  toggleLoading: () => void;
+}) {
   const navigation = useNavigation<any>();
   const opacity = useRef(new Animated.Value(1)).current;
 
   const token = useAppSelector(state => state.auth.token);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }).start(() => {
-        if (token) {
-          navigation.replace('MainTabs');
-        } else {
-          navigation.replace('Login');
-        }
-      });
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [token, navigation]);
 
   return (
     <Animated.View style={[styles.container, { opacity }]}>
@@ -49,6 +35,7 @@ export default function SplashScreen() {
         autoPlay
         loop={false}
         style={{ height: height * 1.2, width }}
+        onAnimationFinish={toggleLoading}
       />
     </Animated.View>
   );
