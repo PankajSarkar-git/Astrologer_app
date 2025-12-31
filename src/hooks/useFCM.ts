@@ -448,6 +448,9 @@ export default function useFcm(isAuthenticated: boolean) {
         const initialMessage: any = await getInitialNotification(messaging);
 
         if (initialMessage?.data) {
+          const decodedData = JSON.parse(initialMessage?.data?.session);
+          dispatch(setOtherUser(decodedData.user));
+          dispatch(setSession(decodedData));
           handleNotificationNavigation(initialMessage.data);
           if (initialMessage.data.type !== 'POST_CREATED') {
             dispatch(markNotificationRead(initialMessage.data.id));

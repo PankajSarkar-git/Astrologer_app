@@ -34,6 +34,7 @@ import Notification from '../screens/notification';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
+  const [loading, setLoading] = React.useState(true);
   const dispatch = useDispatch();
   const { token, isAuthenticated } = useSelector(
     (state: RootState) => state.auth,
@@ -73,12 +74,17 @@ export default function AppNavigator() {
     isAuthenticated,
   );
   const { connect, isConnected, disconnect, send } = useWebSocket(user?.id);
+
+  if (loading) {
+    return <SplashScreen toggleLoading={() => setLoading(false)} />;
+  }
+
   return (
     <Stack.Navigator
-      initialRouteName="Splash"
+      initialRouteName={!token ? 'Login' : 'MainTabs'}
       screenOptions={{ headerShown: false }}
     >
-      <Stack.Screen name="Splash" component={SplashScreen} />
+      {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
       {!token ? (
         <Stack.Screen name="Login" component={Login} />
       ) : (
