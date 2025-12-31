@@ -114,7 +114,7 @@ const EditPost = ({ route, navigation }: Props) => {
   }
 
   return (
-    <PageWithHeader scrollEnabled>
+    <PageWithHeader scrollEnabled title="Edit Post">
       <ScrollView className="flex-1 bg-[#fafafa] p-4">
         <Text className="mb-4 text-2xl font-semibold text-black">
           Edit Your Post

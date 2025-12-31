@@ -59,7 +59,7 @@ const ProfilePage = () => {
   }
 
   return (
-    <PageWithHeader>
+    <PageWithHeader title="Profile">
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* ================= PROFILE CARD ================= */}
         <View style={styles.profileCard}>

@@ -1,10 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
 
 import PageWithHeader from '../../components/layout/page-with-header';
@@ -17,9 +19,17 @@ import { textStyle } from '../../constant/text-style';
 
 import { Transaction } from '../../utils/types';
 import { useWalletTransactions } from '../../api/hooks/useWallet';
+import { useWithdraw } from '../../api/hooks/useWallet';
+
+import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
+import { setWalletBalance } from '../../store/reducer/wallet';
+import { showToast } from '../../components/common/toast';
 
 const AstrologerWallet = () => {
   const onEndReachedCalledDuringMomentum = useRef(false);
+  const dispatch = useAppDispatch();
+
+  const [amount, setAmount] = useState('');
 
   const {
     data,
@@ -30,23 +40,102 @@ const AstrologerWallet = () => {
     isError,
   } = useWalletTransactions();
 
-  /* ---------- FLATTEN DATA ---------- */
+  const { mutate: withdraw, isPending } = useWithdraw();
+
+  /* ---------- SET WALLET DATA TO REDUX ---------- */
+  useEffect(() => {
+    const wallet = data?.pages?.[0]?.wallet;
+    if (!wallet) return;
+
+    dispatch(
+      setWalletBalance({
+        balance: wallet.balance ?? 0,
+        lockedBalance: wallet.lockedBalance ?? 0,
+      }),
+    );
+  }, [data, dispatch]);
+
+  /* ---------- READ WALLET FROM REDUX ---------- */
+  const { balance, lockedBalance, totalBalance } = useAppSelector(
+    s => s.wallet,
+  );
+
+  /* ---------- TRANSACTIONS ---------- */
   const transactions: Transaction[] =
     data?.pages.flatMap(p => p.wallet?.transactions ?? []) ?? [];
 
-  const walletBalance = data?.pages?.[0]?.wallet?.balance ?? 0;
+  /* ---------- WITHDRAW ---------- */
+  const handleWithdraw = () => {
+    const numericAmount = Number(amount);
+
+    if (!numericAmount || numericAmount <= 0) {
+      showToast({
+        type: 'error',
+        message: 'Enter a valid amount',
+      });
+      return;
+    }
+
+    if (numericAmount > totalBalance) {
+      showToast({
+        type: 'error',
+        message: 'Insufficient balance',
+      });
+      return;
+    }
+
+    withdraw(numericAmount, {
+      onSuccess: () => {
+        setAmount('');
+      },
+    });
+  };
 
   return (
-    <PageWithHeader scrollEnabled={false}>
+    <PageWithHeader scrollEnabled={false} title="Wallet">
       <View style={styles.container}>
         {/* BALANCE CARD */}
         <View style={styles.balanceCard}>
           <Text style={[textStyle.fs_abyss_14_400, styles.balanceLabel]}>
             Available Balance
           </Text>
+
           <Text style={[textStyle.fs_abyss_24_400, styles.balanceValue]}>
-            ₹{Number(walletBalance).toFixed(2)}
+            ₹{totalBalance.toFixed(2)}
           </Text>
+
+          <View style={{ marginTop: verticalScale(8) }}>
+            <Text style={[textStyle.fs_abyss_12_400, styles.balanceSub]}>
+              Wallet: ₹{balance.toFixed(2)}
+            </Text>
+            <Text style={[textStyle.fs_abyss_12_400, styles.balanceSub]}>
+              Locked: ₹{lockedBalance.toFixed(2)}
+            </Text>
+          </View>
+        </View>
+
+        {/* WITHDRAW SECTION */}
+        <View style={styles.withdrawContainer}>
+          <Text style={[textStyle.fs_abyss_14_400]}>Withdraw Amount</Text>
+
+          <TextInput
+            value={amount}
+            onChangeText={setAmount}
+            placeholder="Enter amount"
+            keyboardType="numeric"
+            style={styles.withdrawInput}
+            placeholderTextColor="#999"
+          />
+
+          <TouchableOpacity
+            style={[styles.withdrawButton, isPending && { opacity: 0.6 }]}
+            onPress={handleWithdraw}
+            disabled={isPending}
+          >
+            <Text style={styles.withdrawButtonText}>
+              {isPending ? 'Processing...' : 'Withdraw'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* TRANSACTIONS */}
@@ -128,6 +217,33 @@ const styles = StyleSheet.create({
   balanceValue: {
     color: COLORS.theme.white,
     marginTop: verticalScale(8),
+  },
+  balanceSub: {
+    color: COLORS.theme.white,
+    opacity: 0.8,
+  },
+  withdrawContainer: {
+    marginBottom: verticalScale(24),
+  },
+  withdrawInput: {
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.theme.primary,
+    paddingVertical: verticalScale(8),
+    marginTop: verticalScale(8),
+    fontSize: 16,
+    color: COLORS.theme.black,
+  },
+  withdrawButton: {
+    marginTop: verticalScale(16),
+    backgroundColor: COLORS.theme.primary,
+    paddingVertical: verticalScale(12),
+    borderRadius: moderateScale(6),
+    alignItems: 'center',
+  },
+  withdrawButtonText: {
+    color: COLORS.theme.white,
+    fontSize: 16,
+    fontWeight: '500',
   },
   listContainer: {
     flex: 1,

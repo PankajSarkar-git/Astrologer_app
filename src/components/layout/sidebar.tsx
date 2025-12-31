@@ -3,6 +3,7 @@ import React, {
   useState,
   useImperativeHandle,
   forwardRef,
+  useEffect,
 } from 'react';
 import {
   View,
@@ -33,6 +34,8 @@ import { scale } from '../../utils/sizer';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
 import { logout } from '../../store/reducer/auth';
 import HistoryIcon from '../../assets/icon/history-icon';
+import { useWalletTransactions } from '../../api/hooks/useWallet';
+import { setWalletBalance } from '../../store/reducer/wallet';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -47,8 +50,21 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   const overlayAnim = useRef(new Animated.Value(0)).current;
   // console.log(ref, 'ref');
   const { user } = useAppSelector(store => store.auth);
+  const { totalBalance } = useAppSelector(store => store.wallet);
   const navigation = useNavigation<any>();
+  const { data } = useWalletTransactions();
+  /* ---------- SET WALLET DATA TO REDUX ---------- */
+  useEffect(() => {
+    const wallet = data?.pages?.[0]?.wallet;
+    if (!wallet) return;
 
+    dispatch(
+      setWalletBalance({
+        balance: wallet.balance ?? 0,
+        lockedBalance: wallet.lockedBalance ?? 0,
+      }),
+    );
+  }, [data, dispatch]);
   const navItems = [
     { title: 'Home', href: 'Home', icon: <HomeIcon size={20} /> },
     // {
@@ -154,7 +170,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
             <View style={{ flex: 1 }}>
               <Text style={styles.username}>{user.name}</Text>
               <Text style={styles.balanceText}>
-                Balance: ₹ {user.walletBalance}
+                Balance: ₹ {totalBalance || 0}
               </Text>
             </View>
           </View>

@@ -10,6 +10,7 @@ import sessionReducer from './reducer/session';
 // import paymentReducer from './reducer/payment';
 // import astrologerReducer from './reducer/astrologers';
 import notificationReducer from './reducer/notifications';
+import walletReducer from './reducer/wallet';
 const rootReducer = combineReducers({
   auth: authReducer,
   // user: userReducer,
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
   // payment: paymentReducer,
   // astrologer: astrologerReducer,
   notifications: notificationReducer,
+  wallet: walletReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

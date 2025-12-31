@@ -6,23 +6,27 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ChatHistoryCard from '../../components/ChatHistoryCard';
 import CallHistoryCard from '../../components/CallHistoryCard';
-import {scale, verticalScale} from '../../utils/sizer';
-import {COLORS, colors, themeColors} from '../../constants/colors';
-import {textStyle} from '../../constants/text-style';
+import { scale, verticalScale } from '../../utils/sizer';
+import { COLORS, colors, themeColors } from '../../constants/colors';
+import { textStyle } from '../../constants/text-style';
 import Tab from '../../components/tab';
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {
+  useIsFocused,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
 import {
   getCallHistory,
   getChatHistory,
   setOtherUser,
   setSession,
 } from '../../store/reducer/session';
-import {useUserRole} from '../../hooks/use-role';
-import {CallSession, ChatSession, UserDetail} from '../../utils/types';
+import { useUserRole } from '../../hooks/use-role';
+import { CallSession, ChatSession, UserDetail } from '../../utils/types';
 import AboutIcon from '../../assets/icons/about-icon';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 
@@ -113,7 +117,7 @@ const CallChat = () => {
     }
   }, [isFocused, activeTab]);
 
-  const renderMessageItem = ({item}: {item: ChatSession}) => {
+  const renderMessageItem = ({ item }: { item: ChatSession }) => {
     const data = item.astrologer;
     return (
       <TouchableOpacity
@@ -121,13 +125,14 @@ const CallChat = () => {
           dispatch(setOtherUser(data));
           dispatch(setSession(item));
           navigation.navigate('ChatScreen');
-        }}>
+        }}
+      >
         <ChatHistoryCard data={item} active={item.status === 'ACTIVE'} />
       </TouchableOpacity>
     );
   };
 
-  const renderCallItem = ({item}: {item: CallSession}) => (
+  const renderCallItem = ({ item }: { item: CallSession }) => (
     <TouchableOpacity>
       <CallHistoryCard data={item} />
     </TouchableOpacity>
@@ -156,8 +161,8 @@ const CallChat = () => {
       <View>
         <Tab
           tabs={[
-            {key: 'chat', label: 'Chat'},
-            {key: 'call', label: 'Call'},
+            { key: 'chat', label: 'Chat' },
+            { key: 'call', label: 'Call' },
           ]}
           onTabChange={tab => setActiveTab(tab)}
           initialTab="chat"
@@ -196,8 +201,12 @@ const CallChat = () => {
                   minHeight: 400,
                   justifyContent: 'center',
                   alignItems: 'center',
-                }}>
-                <ActivityIndicator size="small" style={{marginVertical: 10}} />
+                }}
+              >
+                <ActivityIndicator
+                  size="small"
+                  style={{ marginVertical: 10 }}
+                />
               </View>
             ) : null
           }
@@ -208,7 +217,8 @@ const CallChat = () => {
                   height: verticalScale(400),
                   justifyContent: 'center',
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 <AboutIcon color={themeColors.status.info.dark} />
                 <Text style={[textStyle.fs_mont_16_500]}>No Chat History</Text>
               </View>
@@ -246,8 +256,12 @@ const CallChat = () => {
                   minHeight: 400,
                   justifyContent: 'center',
                   alignItems: 'center',
-                }}>
-                <ActivityIndicator size="small" style={{marginVertical: 10}} />
+                }}
+              >
+                <ActivityIndicator
+                  size="small"
+                  style={{ marginVertical: 10 }}
+                />
               </View>
             ) : null
           }
@@ -258,7 +272,8 @@ const CallChat = () => {
                   height: verticalScale(400),
                   justifyContent: 'center',
                   alignItems: 'center',
-                }}>
+                }}
+              >
                 <AboutIcon color={themeColors.status.info.dark} />
                 <Text style={[textStyle.fs_mont_16_500]}>No Call History</Text>
               </View>
