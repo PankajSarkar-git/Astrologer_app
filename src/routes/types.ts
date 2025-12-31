@@ -1,9 +1,23 @@
-// src/routes/types.ts
-
 export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
-  EditPost: {
-    id: string;
+  History: undefined;
+
+  ChatScreen: {
+    chatId: string;
+  };
+
+  Notification: undefined;
+  EditPost: { id: string };
+  ProfileEdit: { id: string };
+  about: undefined;
+  Wallet: undefined;
+  Splash: undefined;
+
+  ZegoUIKitPrebuiltCallWaitingScreen: {
+    roomID: string;
+  };
+  ZegoUIKitPrebuiltCallInCallScreen: {
+    roomID: string;
   };
 };

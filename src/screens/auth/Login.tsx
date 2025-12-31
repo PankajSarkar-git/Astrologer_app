@@ -145,6 +145,7 @@ import Input from '../../components/common/input';
 import CustomButton from '../../components/common/custom-button';
 import { useLogin } from '../../api/hooks/useAuth';
 import { showToast } from '../../components/common/toast';
+import { askCallPermissions } from '../../utils/askPermission';
 
 const Login = () => {
   const navigation = useNavigation<any>();
@@ -194,7 +195,7 @@ const Login = () => {
       {
         onSuccess: () => {
           console.log('Login successful');
-
+          askCallPermissions();
           navigation.navigate('MainTabs', { screen: 'Home' });
         },
         onError: (err: any) => {

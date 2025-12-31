@@ -1,97 +1,200 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Pressable,
+  StyleSheet,
+} from 'react-native';
+import { useRoute } from '@react-navigation/native';
+
 import { scale, verticalScale } from '../../utils/sizer';
 import { COLORS } from '../../constant/colors';
+
 import MenuIcon from '../../assets/icons/menu-icon';
 import NotificationIcon from '../../assets/icons/notification-icon';
+import BackIcon from '../../assets/icon/back-icon';
 
 interface AppHeaderProps {
   scrolled?: boolean;
+  title?: string;
   initials?: string;
   onMenuPress?: () => void;
   onNotificationPress?: () => void;
   onProfilePress?: () => void;
+  onBackPress?: () => void;
+  canGoBack?: boolean;
   rounded?: boolean;
   themeMode?: 'light' | 'dark';
 }
-// home Booking post history call/chats
+
 const AppHeader = ({
   scrolled = true,
+  title = '',
   initials = 'SK',
   onMenuPress,
   onNotificationPress,
   onProfilePress,
+  onBackPress,
+  canGoBack = false,
   rounded = false,
   themeMode = 'dark',
 }: AppHeaderProps) => {
+  const route = useRoute();
   const isLight = themeMode === 'light';
+  const isHome = route.name === 'Home';
+
+  const backgroundColor = scrolled
+    ? isLight
+      ? COLORS.theme.white
+      : COLORS.theme.primary
+    : 'transparent';
+
+  const iconColor = isLight ? '#666' : COLORS.theme.white;
 
   return (
     <View
-      className="absolute left-0 right-0 top-0 z-[9999] w-full flex-row items-center justify-between px-5"
-      style={{
-        height: verticalScale(80),
-        backgroundColor: scrolled
-          ? isLight
-            ? COLORS.theme.white
-            : COLORS.theme.primary
-          : 'transparent',
-        borderBottomLeftRadius: rounded ? scale(16) : 0,
-        borderBottomEndRadius: rounded ? scale(16) : 0,
-      }}
+      style={[
+        styles.container,
+        {
+          backgroundColor,
+          borderBottomLeftRadius: rounded ? scale(16) : 0,
+          borderBottomRightRadius: rounded ? scale(16) : 0,
+          borderBottomWidth: isLight ? 1 : 0,
+          borderBottomColor: isLight ? COLORS.theme.gray.light : 'transparent',
+        },
+      ]}
     >
-      {/* Menu Icon */}
-      <TouchableOpacity
-        onPress={onMenuPress}
-        className="flex size-14 items-center justify-center"
-      >
-        <MenuIcon color={isLight ? '#666' : COLORS.theme.white} />
-      </TouchableOpacity>
+      {/* LEFT */}
+      <View style={styles.left}>
+        {canGoBack ? (
+          <TouchableOpacity onPress={onBackPress}>
+            <BackIcon color={iconColor} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={onMenuPress}>
+            <MenuIcon color={iconColor} />
+          </TouchableOpacity>
+        )}
+      </View>
 
-      {/* Right Section */}
-      <View className="flex-row items-center" style={{ gap: scale(16) }}>
-        {/* Notification Button */}
+      {/* TITLE */}
+      {(canGoBack || !isHome) && (
+        <View style={styles.center}>
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.title,
+              { color: isLight ? '#333' : COLORS.theme.white },
+            ]}
+          >
+            {title}
+          </Text>
+        </View>
+      )}
+
+      {/* RIGHT */}
+      <View style={styles.right}>
+        {/* Notification */}
         <TouchableOpacity
           onPress={onNotificationPress}
-          className="items-center justify-center rounded-full"
-          style={{
-            height: scale(36),
-            width: scale(36),
-            backgroundColor: isLight ? '#F2F2F2' : COLORS.theme.white,
-          }}
+          style={[
+            styles.notification,
+            {
+              backgroundColor: isLight ? '#F2F2F2' : COLORS.theme.white,
+            },
+          ]}
         >
-          <View
-            className="absolute rounded-full"
-            style={{
-              height: 8,
-              width: 8,
-              top: verticalScale(6),
-              right: scale(6),
-              backgroundColor: COLORS.status.success.base,
-            }}
-          />
-
+          <View style={styles.dot} />
           <NotificationIcon size={16} color={isLight ? '#444' : undefined} />
         </TouchableOpacity>
 
         {/* Profile */}
-        <Pressable onPress={onProfilePress}>
-          <View
-            className="items-center justify-center rounded-full border-2"
-            style={{
-              height: scale(50),
-              width: scale(50),
-              borderRadius: scale(30),
-              backgroundColor: COLORS.theme.white,
-              borderColor: isLight ? '#E0E0E0' : COLORS.theme.secondary,
-            }}
-          >
-            <Text style={{ color: isLight ? '#333' : '#000' }}>{initials}</Text>
-          </View>
-        </Pressable>
+        {onProfilePress && (
+          <Pressable onPress={onProfilePress}>
+            <View
+              style={[
+                styles.profile,
+                {
+                  backgroundColor: COLORS.theme.white,
+                  borderColor: isLight ? '#E0E0E0' : COLORS.theme.secondary,
+                },
+              ]}
+            >
+              <Text style={{ color: '#000' }}>{initials}</Text>
+            </View>
+          </Pressable>
+        )}
       </View>
     </View>
   );
 };
 
 export default AppHeader;
+
+/* ---------- STYLES ---------- */
+const styles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 9999,
+    height: verticalScale(80),
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: scale(20),
+  },
+
+  left: {
+    width: scale(40),
+    alignItems: 'flex-start',
+  },
+
+  center: {
+    position: 'absolute',
+    left: scale(60),
+    right: scale(60),
+    alignItems: 'center',
+  },
+
+  title: {
+    fontSize: scale(18),
+    fontWeight: '600',
+  },
+
+  right: {
+    marginLeft: 'auto',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(16),
+  },
+
+  notification: {
+    height: scale(36),
+    width: scale(36),
+    borderRadius: scale(30),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  dot: {
+    position: 'absolute',
+    top: verticalScale(6),
+    right: scale(6),
+    height: 8,
+    width: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.status.success.base,
+    zIndex: 10,
+  },
+
+  profile: {
+    height: scale(46),
+    width: scale(46),
+    borderRadius: scale(30),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+  },
+});

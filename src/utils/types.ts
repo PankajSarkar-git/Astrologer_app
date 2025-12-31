@@ -1,6 +1,8 @@
 export type RootStackParamList = {
   Home: undefined; // if no params
-  Profile: {userId: string}; // example with params
+  Profile: { userId: string }; // example with params
+  ZegoUIKitPrebuiltCallWaitingScreen: undefined;
+  ZegoUIKitPrebuiltCallInCallScreen: undefined;
 };
 
 //users interface
@@ -47,7 +49,7 @@ export interface Astrologers {
   user: UserDetail;
 }
 
-import {ImageSourcePropType} from 'react-native';
+import { ImageSourcePropType } from 'react-native';
 
 export interface Review {
   id: number;
@@ -200,6 +202,7 @@ export interface SessionState {
 }
 
 export interface Message {
+  // id: string;
   senderId: string;
   receiverId: string;
   sessionId: string;

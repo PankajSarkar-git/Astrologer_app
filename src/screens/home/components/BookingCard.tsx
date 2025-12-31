@@ -3,11 +3,13 @@ import React from 'react';
 import { scale, scaleFont, verticalScale } from '../../../utils/sizer';
 import { COLORS } from '../../../constant/colors';
 import { textStyle } from '../../../constant/text-style';
+import { ZegoSendCallInvitationButton } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 
 type BookingCardProps = {
   item: any;
-  onAccept?: (payload: { id: string; status: string; otp: null }) => void;
-  onReject?: (payload: { id: string; status: string; otp: null }) => void;
+  onAccept?: (payload: { id: string }) => void;
+  onReject?: (payload: { id: string }) => void;
+  onComplete?: (payload: { id: string }) => void;
   onStartSession?: (item: any) => void;
 };
 
@@ -16,24 +18,19 @@ export const BookingCard = ({
   onAccept,
   onReject,
   onStartSession,
+  onComplete,
 }: BookingCardProps) => {
-  const getStatusColor = (status: any) => {
+  const getStatusColor = (status: string) => {
     if (status === 'PENDING') return '#FFA726';
-    if (status === 'CONFIRMED') return '#42A5F5';
+    if (status === 'APPROVED') return '#42A5F5';
     if (status === 'COMPLETED') return '#4CAF50';
     if (status === 'CANCELLED') return '#F44336';
     return COLORS.theme.gray.light;
   };
 
-  const getSessionTypeIcon = (type: any) => {
-    if (type === 'CHAT') return '💬';
-    if (type === 'VIDEO') return '📹';
-    return '📞';
-  };
-
   const isPending = item.status === 'PENDING' || item.status === null;
   const isApproved = item.status === 'APPROVED';
-
+  const isCompleted = item.status === 'COMPLETED';
   const sessionLabel =
     item.sessionType === 'CHAT'
       ? 'Start Chat'
@@ -69,11 +66,10 @@ export const BookingCard = ({
         <View style={{ flex: 1 }}>
           <Text style={textStyle.fs_mont_16_600}>{item.user?.name}</Text>
           <Text style={{ fontSize: scaleFont(12), marginTop: 2 }}>
-            {getSessionTypeIcon(item.sessionType)} {item.sessionType}
+            {item.sessionType}
           </Text>
         </View>
 
-        {/* STATUS */}
         <View
           style={{
             backgroundColor: getStatusColor(item.status),
@@ -93,20 +89,8 @@ export const BookingCard = ({
         📅 {item.appointmentDate} ⏱️ {item.appointmentDuration} mins
       </Text>
 
-      {item.reason ? (
-        <Text style={{ marginTop: 6, fontSize: scaleFont(12) }}>
-          Reason: {item.reason}
-        </Text>
-      ) : null}
-
-      {item.user.mobile ? (
-        <Text style={{ marginTop: 6, fontSize: scaleFont(12) }}>
-          Mobile: {item.user.mobile}
-        </Text>
-      ) : null}
-
-      {/* PENDING → Approve + Cancel */}
-      {isPending && (
+      {/* PENDING ACTIONS */}
+      {!isCompleted && isPending && (
         <View
           style={{
             flexDirection: 'row',
@@ -114,17 +98,14 @@ export const BookingCard = ({
             marginTop: verticalScale(12),
           }}
         >
-          {/* Cancel */}
           <TouchableOpacity
             onPress={() =>
               onReject?.({
                 id: item.id,
-                status: 'CANCEL',
-                otp: null,
               })
             }
             style={{
-              paddingVertical: verticalScale(6),
+              paddingVertical: verticalScale(10),
               paddingHorizontal: scale(14),
               borderRadius: scale(10),
               borderWidth: 1,
@@ -137,17 +118,14 @@ export const BookingCard = ({
             </Text>
           </TouchableOpacity>
 
-          {/* Approve */}
           <TouchableOpacity
             onPress={() =>
               onAccept?.({
                 id: item.id,
-                status: 'CONFIRM',
-                otp: null,
               })
             }
             style={{
-              paddingVertical: verticalScale(6),
+              paddingVertical: verticalScale(10),
               paddingHorizontal: scale(14),
               borderRadius: scale(10),
               backgroundColor: '#4CAF50',
@@ -160,26 +138,78 @@ export const BookingCard = ({
         </View>
       )}
 
-      {/* APPROVED → Start Session */}
-      {isApproved && (
+      {/* APPROVED ACTIONS */}
+      {!isCompleted && isApproved && (
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'flex-end',
+            alignItems: 'center',
             marginTop: verticalScale(12),
           }}
         >
+          {item.sessionType === 'AUDIO' && (
+            <View style={{ paddingHorizontal: verticalScale(10) }}>
+              <ZegoSendCallInvitationButton
+                invitees={[
+                  {
+                    userID: item?.callSession?.user?.mobile,
+                    userName: item?.user?.name?.slice(0, 20),
+                  },
+                ]}
+                isVideoCall={false}
+                resourceID="astrosevaa"
+              />
+            </View>
+          )}
+
+          {item.sessionType === 'VIDEO' && (
+            <View style={{ paddingHorizontal: verticalScale(10) }}>
+              <ZegoSendCallInvitationButton
+                invitees={[
+                  {
+                    userID: item?.callSession?.user?.mobile,
+                    userName: item?.user?.name?.slice(0, 20),
+                  },
+                ]}
+                isVideoCall={true}
+                resourceID="astrosevaa"
+              />
+            </View>
+          )}
+
+          {item.sessionType === 'CHAT' && (
+            <TouchableOpacity
+              onPress={() => onStartSession?.(item)}
+              style={{
+                paddingVertical: verticalScale(10),
+                paddingHorizontal: scale(16),
+                borderRadius: scale(10),
+                backgroundColor: '#42A5F5',
+                marginRight: scale(8),
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: scaleFont(13) }}>
+                {sessionLabel}
+              </Text>
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
-            onPress={() => onStartSession?.(item)}
+            onPress={() =>
+              onComplete?.({
+                id: item.id,
+              })
+            }
             style={{
-              paddingVertical: verticalScale(6),
+              paddingVertical: verticalScale(10),
               paddingHorizontal: scale(16),
               borderRadius: scale(10),
-              backgroundColor: '#42A5F5',
+              backgroundColor: '#4CAF50',
             }}
           >
             <Text style={{ color: '#fff', fontSize: scaleFont(13) }}>
-              {sessionLabel}
+              Complete
             </Text>
           </TouchableOpacity>
         </View>

@@ -104,7 +104,9 @@ import {
 } from '../../api/hooks/useBooking';
 import { BookingCard } from './components/BookingCard';
 import { COLORS } from '../../constant/colors';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useAppDispatch } from '../../hooks/redux-hook';
+import { setOtherUser, setSession } from '../../store/reducer/session';
 
 const Home = () => {
   const {
@@ -120,21 +122,17 @@ const Home = () => {
   const { mutate: updateStatus, isPending } = useUpdateBookingStatus();
 
   const bookings = data?.pages?.flatMap(page => page.appointments || []) || [];
-
+  const navigation = useNavigation<any>();
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, []),
-  );
+  const dispatch = useAppDispatch();
 
   return (
-    <PageWithHeader scroll={false}>
+    <PageWithHeader scrollEnabled={false}>
       <View
         style={{ padding: 20, flex: 1, backgroundColor: COLORS.theme.white }}
       >
@@ -166,6 +164,8 @@ const Home = () => {
 
         {!isLoading && bookings.length > 0 && (
           <FlatList
+            refreshing={isLoading}
+            onRefresh={refetch}
             className="mb-16"
             data={bookings}
             nestedScrollEnabled
@@ -181,18 +181,29 @@ const Home = () => {
             renderItem={({ item }) => (
               <BookingCard
                 item={item}
+                onStartSession={item => {
+                  if (item.sessionType === 'CHAT') {
+                    dispatch(setOtherUser(item.chatSession.user));
+                    dispatch(setSession(item.chatSession));
+                    navigation.navigate('ChatScreen');
+                  }
+                }}
                 onAccept={({ id }) => {
                   updateStatus({
                     id,
                     status: 'APPROVED',
-                    otp: null,
+                  });
+                }}
+                onComplete={({ id }) => {
+                  updateStatus({
+                    id,
+                    status: 'COMPLETED',
                   });
                 }}
                 onReject={({ id }) => {
                   updateStatus({
                     id,
                     status: 'CANCELLED',
-                    otp: null,
                   });
                 }}
               />

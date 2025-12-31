@@ -26,6 +26,7 @@ export interface AuthState {
   user: UserDetail;
   isProfileComplete: boolean;
   isProfileModalOpen: boolean;
+  astroId: string;
 }
 
 const isProfileComplete = (user: UserDetail): boolean =>
@@ -49,7 +50,7 @@ const initialState: AuthState = {
   otp: '',
   isProfileComplete: false,
   isProfileModalOpen: false,
-
+  astroId: '',
   astrologer_detail: {
     id: '',
     about: null,
@@ -91,7 +92,9 @@ export const authSlice = createSlice({
       state.token = null;
       state.mobile = null;
     },
-
+    setAstroId: (state, action: PayloadAction<string>) => {
+      state.astroId = action.payload;
+    },
     setMobile: (state, action: PayloadAction<string>) => {
       state.mobile = action.payload;
     },
@@ -150,6 +153,7 @@ export const {
   setAstrologer,
   setAuthentication,
   setToken,
+  setAstroId,
 } = authSlice.actions;
 
 export default authSlice.reducer;

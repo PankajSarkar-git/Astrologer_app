@@ -8,18 +8,20 @@ export function shuffleArray<T>(array: T[]): T[] {
   return result;
 }
 
-// export function decodeMessageBody(message: any): string {
-//   if (message.isBinaryBody && message._binaryBody) {
-//     const byteArray = Object.values(message._binaryBody) as number[];
-//     const uint8Arr = new Uint8Array(byteArray);
-//     return new TextDecoder('utf-8').decode(uint8Arr);
-//   } else if (typeof message.body === 'string') {
-//     return message.body;
-//   } else {
-//     console.warn('Unknown message format:', message);
-//     return '';
-//   }
-// }
+export function decodeMessageBody(message: any): string {
+  if (typeof message?.body === 'string') {
+    return message.body;
+  }
+
+  if (message?._binaryBody) {
+    return String.fromCharCode(
+      ...(Object.values(message._binaryBody) as number[]),
+    );
+  }
+
+  console.warn('Unknown message format', message);
+  return '';
+}
 
 export const makeResponsiveSVG = (
   svgContent: string,
@@ -161,3 +163,46 @@ export function getFormattedDate() {
     year: date.getFullYear(),
   };
 }
+
+export const formatNotificationTime = (dateString: string | null): string => {
+  if (!dateString) return 'Just now';
+
+  const date = new Date(dateString);
+  const now = new Date();
+
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  // 🟢 Just now
+  if (diffMinutes < 1) {
+    return 'Just now';
+  }
+
+  // 🟢 Minutes ago
+  if (diffMinutes < 60) {
+    return `${diffMinutes} min ago`;
+  }
+
+  // 🟢 Today
+  if (diffDays === 0) {
+    return date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  // 🟢 Yesterday
+  if (diffDays === 1) {
+    return 'Yesterday';
+  }
+
+  // 🟢 Last 7 days
+  if (diffDays < 7) {
+    return `${diffDays} days ago`;
+  }
+
+  // 🟢 Older dates
+  return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+};

@@ -87,18 +87,14 @@ export function useCurrentUser() {
   return query; // returns { data, isLoading, error, ... }
 }
 
-export function useLogout() {
-  const dispatch = useDispatch();
+export function useDeviceToken() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => AuthService.logout(),
+    mutationFn: ({ deviceToken }: { deviceToken: string }) =>
+      AuthService.deviceToken(deviceToken),
 
     onSuccess: () => {
-      dispatch(logout());
-      dispatch(setAuthentication(false));
-
-      // Clear all cached user data
       queryClient.clear();
     },
   });
