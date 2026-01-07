@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import PageWithHeader from '../../components/layout/page-with-header';
 import { verticalScale } from '../../utils/sizer';
-import { formatNotificationTime } from '../../utils/utils';
+import { formatNotificationTime } from '../../utils/notificationTime';
 import {
   useNotifications,
   useMarkNotificationRead,
@@ -53,6 +53,7 @@ const Notification = () => {
     if (!data?.pages) return [];
     return data.pages.flatMap(page => page.content ?? page.notifications ?? []);
   }, [data]);
+  console.log(notifications, 'notifications');
 
   /* ---------------- REFRESH ---------------- */
 
@@ -168,7 +169,7 @@ const Notification = () => {
         {/* RIGHT */}
         <View style={styles.rightContainer}>
           <Text style={styles.time}>
-            {formatNotificationTime(item.createdAt) ?? 'Just now'}
+            {formatNotificationTime(item.createdAt)}
           </Text>
           {!item.read && <View style={styles.unreadDot} />}
         </View>

@@ -164,45 +164,45 @@ export function getFormattedDate() {
   };
 }
 
-export const formatNotificationTime = (dateString: string | null): string => {
-  if (!dateString) return 'Just now';
+// export const formatNotificationTime = (dateString: string | null): string => {
+//   if (!dateString) return 'Just now';
 
-  const date = new Date(dateString);
-  const now = new Date();
+//   const date = new Date(dateString);
+//   const now = new Date();
 
-  const diffMs = now.getTime() - date.getTime();
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
+//   const diffMs = now.getTime() - date.getTime();
+//   const diffMinutes = Math.floor(diffMs / (1000 * 60));
+//   const diffHours = Math.floor(diffMinutes / 60);
+//   const diffDays = Math.floor(diffHours / 24);
 
-  // 🟢 Just now
-  if (diffMinutes < 1) {
-    return 'Just now';
-  }
+//   // 🟢 Just now
+//   if (diffMinutes < 1) {
+//     return 'Just now';
+//   }
 
-  // 🟢 Minutes ago
-  if (diffMinutes < 60) {
-    return `${diffMinutes} min ago`;
-  }
+//   // 🟢 Minutes ago
+//   if (diffMinutes < 60) {
+//     return `${diffMinutes} min ago`;
+//   }
 
-  // 🟢 Today
-  if (diffDays === 0) {
-    return date.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+//   // 🟢 Today
+//   if (diffDays === 0) {
+//     return date.toLocaleTimeString([], {
+//       hour: '2-digit',
+//       minute: '2-digit',
+//     });
+//   }
 
-  // 🟢 Yesterday
-  if (diffDays === 1) {
-    return 'Yesterday';
-  }
+//   // 🟢 Yesterday
+//   if (diffDays === 1) {
+//     return 'Yesterday';
+//   }
 
-  // 🟢 Last 7 days
-  if (diffDays < 7) {
-    return `${diffDays} days ago`;
-  }
+//   // 🟢 Last 7 days
+//   if (diffDays < 7) {
+//     return `${diffDays} days ago`;
+//   }
 
-  // 🟢 Older dates
-  return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
-};
+//   // 🟢 Older dates
+//   return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+// };

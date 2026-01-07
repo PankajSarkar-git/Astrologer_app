@@ -67,15 +67,21 @@ const AppHeader = ({
     >
       {/* LEFT */}
       <View style={styles.left}>
-        {canGoBack ? (
-          <TouchableOpacity onPress={onBackPress}>
-            <BackIcon color={iconColor} />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={onMenuPress}>
-            <MenuIcon color={iconColor} />
-          </TouchableOpacity>
-        )}
+        <View style={styles.left}>
+          {isHome ? (
+            <TouchableOpacity onPress={onMenuPress}>
+              <MenuIcon color={iconColor} />
+            </TouchableOpacity>
+          ) : canGoBack ? (
+            <TouchableOpacity onPress={onBackPress}>
+              <BackIcon color={iconColor} />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={onMenuPress}>
+              <MenuIcon color={iconColor} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* TITLE */}

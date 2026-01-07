@@ -34,12 +34,12 @@ import Notification from '../screens/notification';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
-  const [loading, setLoading] = React.useState(true);
   const dispatch = useDispatch();
   const { token, isAuthenticated } = useSelector(
     (state: RootState) => state.auth,
   );
-  const { data, error, isError, isSuccess } = useGetMe(!!token);
+  const { data, error, isError, isSuccess, isLoading } = useGetMe(!!token);
+  const [loading, setLoading] = React.useState(isLoading);
   useFcm(isAuthenticated);
   useEffect(() => {
     if (!isSuccess || !data) return;
@@ -89,18 +89,6 @@ export default function AppNavigator() {
         <Stack.Screen name="Login" component={Login} />
       ) : (
         <>
-          <Stack.Screen
-            options={{ headerShown: false }}
-            // DO NOT change the name
-            name="ZegoUIKitPrebuiltCallWaitingScreen"
-            component={ZegoUIKitPrebuiltCallWaitingScreen}
-          />
-          <Stack.Screen
-            options={{ headerShown: false }}
-            // DO NOT change the name
-            name="ZegoUIKitPrebuiltCallInCallScreen"
-            component={ZegoUIKitPrebuiltCallInCallScreen}
-          />
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="EditPost" component={EditPost} />
           <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
@@ -115,6 +103,18 @@ export default function AppNavigator() {
             }}
           />
           <Stack.Screen name="Notification" component={Notification} />
+          <Stack.Screen
+            options={{ headerShown: false }}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallWaitingScreen"
+            component={ZegoUIKitPrebuiltCallWaitingScreen}
+          />
+          <Stack.Screen
+            options={{ headerShown: false }}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallInCallScreen"
+            component={ZegoUIKitPrebuiltCallInCallScreen}
+          />
         </>
       )}
     </Stack.Navigator>

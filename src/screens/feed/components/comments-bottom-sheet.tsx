@@ -466,6 +466,11 @@ const CommentsBottomSheet = ({ visible, onClose, postId }: Props) => {
 
     const isMine = item.user?.id === user?.id;
 
+    // Get the first letter of the name for the fallback
+    const userInitial = item.user?.name
+      ? item.user.name.charAt(0).toUpperCase()
+      : 'U';
+
     return (
       <View
         style={{
@@ -474,19 +479,34 @@ const CommentsBottomSheet = ({ visible, onClose, postId }: Props) => {
           marginBottom: 16,
         }}
       >
-        <Image
-          source={
-            item.user?.imgUri
-              ? { uri: item.user.imgUri }
-              : require('../../../assets/imgs/profile-demo.jpg')
-          }
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            marginRight: 10,
-          }}
-        />
+        {/* Conditional Rendering for Image vs Initials */}
+        {item.user?.imgUri ? (
+          <Image
+            source={{ uri: item.user.imgUri }}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              marginRight: 10,
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: '#E1E1E1', // Light grey background
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 10,
+            }}
+          >
+            <Text style={{ fontWeight: 'bold', color: '#555' }}>
+              {userInitial}
+            </Text>
+          </View>
+        )}
 
         <View style={{ flex: 1 }}>
           <Text style={{ fontWeight: '600' }}>{item.user?.name || 'User'}</Text>

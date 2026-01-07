@@ -52,7 +52,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   const { user } = useAppSelector(store => store.auth);
   const { totalBalance } = useAppSelector(store => store.wallet);
   const navigation = useNavigation<any>();
-  const { data } = useWalletTransactions();
+  const { data, refetch } = useWalletTransactions();
   /* ---------- SET WALLET DATA TO REDUX ---------- */
   useEffect(() => {
     const wallet = data?.pages?.[0]?.wallet;
@@ -101,6 +101,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
 
   const open = () => {
     setVisible(true);
+    refetch();
     Animated.parallel([
       Animated.timing(sidebarAnim, {
         toValue: 0,
