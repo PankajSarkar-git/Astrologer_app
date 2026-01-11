@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import * as ZIM from 'zego-zim-react-native';
 import * as ZPNs from 'zego-zpns-react-native';
+import Config from 'react-native-config';
 
 const appID = 1553526806;
 const appSign =
@@ -59,11 +60,20 @@ export function useZegoAndFCM(
               outgoingCallFileName: 'notification_sound.mp3',
             },
             androidNotificationConfig: {
-              channelID: 'astrosevaa',
-              channelName: 'astrosevaa',
+              channelID: Config.ZEGO_CHANNEl_ID,
+              channelName: Config.ZEGO_CHANNEl_NAME,
             },
           },
-        );
+        ).then(() => {
+          // /////////////////////////
+          ZegoUIKitPrebuiltCallService.requestSystemAlertWindow({
+            message:
+              'We need your consent for the following permissions in order to use the offline call function properly',
+            allow: 'Allow',
+            deny: 'Deny',
+          });
+          // /////////////////////////
+        });
         console.log('[Zego] init success');
       } catch (err) {
         // show a clean error so you can see the real exception in logs

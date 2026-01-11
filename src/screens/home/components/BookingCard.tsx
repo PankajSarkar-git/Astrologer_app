@@ -4,6 +4,7 @@ import { scale, scaleFont, verticalScale } from '../../../utils/sizer';
 import { COLORS } from '../../../constant/colors';
 import { textStyle } from '../../../constant/text-style';
 import { ZegoSendCallInvitationButton } from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import Config from 'react-native-config';
 
 type BookingCardProps = {
   item: any;
@@ -272,7 +273,7 @@ export const BookingCard = ({
                   },
                 ]}
                 isVideoCall={false}
-                resourceID="astrosevaa"
+                resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa'}
               />
             </View>
           )}
@@ -287,7 +288,7 @@ export const BookingCard = ({
                   },
                 ]}
                 isVideoCall={true}
-                resourceID="astrosevaa"
+                resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa'}
               />
             </View>
           )}
