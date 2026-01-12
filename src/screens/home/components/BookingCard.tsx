@@ -273,7 +273,7 @@ export const BookingCard = ({
                   },
                 ]}
                 isVideoCall={false}
-                resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa'}
+                resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa1'}
               />
             </View>
           )}
@@ -288,7 +288,7 @@ export const BookingCard = ({
                   },
                 ]}
                 isVideoCall={true}
-                resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa'}
+                resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa1'}
               />
             </View>
           )}
