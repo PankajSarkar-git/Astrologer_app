@@ -9,7 +9,7 @@ const About = () => {
   const appVersion = DeviceInfo.getVersion(); // e.g. 1.0.3
   const buildNumber = DeviceInfo.getBuildNumber(); // optional
   return (
-    <PageWithHeader title="About AstroSevaa">
+    <PageWithHeader title="About Sevaaadmin">
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
@@ -24,15 +24,15 @@ const About = () => {
           source={require('../../assets/imgs/logo.png')}
         />
         <Text style={{ fontSize: 16, textAlign: 'center', color: '#555' }}>
-          Astrosevaa is a trusted astrology app designed to deliver accurate,
+          Sevaaadmin is a trusted astrology app designed to deliver accurate,
           personalized guidance through expert astrologers. Users can consult
           professionals via audio and video calls for insights on career,
           relationships, finance, health, and life decisions. The app combines
           traditional Vedic astrology with modern technology to ensure fast,
           private, and reliable consultations. With easy appointment booking,
-          secure payments, and verified astrologers, Astrosevaa removes
+          secure payments, and verified astrologers, Sevaaadmin removes
           guesswork and fake predictions. Whether you seek clarity, direction,
-          or solutions, Astrosevaa focuses on practical answers—not
+          or solutions, Sevaaadmin focuses on practical answers—not
           superstition—helping users make informed decisions with confidence and
           convenience, anytime and anywhere.
         </Text>
