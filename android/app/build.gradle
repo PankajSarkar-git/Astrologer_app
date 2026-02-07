@@ -84,8 +84,8 @@ android {
         applicationId "com.astrosevaa.astro"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 11
-        versionName "11.0"
+        versionCode 13
+        versionName "13.0"
     }
     signingConfigs {
         release {
