@@ -367,8 +367,8 @@ export default function useFcm(isAuthenticated: boolean) {
   const [fcmToken, setFcmToken] = useState<string>();
   const [registering, setRegistering] = useState(false);
   const { mutate: sendDeviceToken } = useDeviceToken();
-  const onMessageUnsub = useRef<() => void>(() => {});
-  const onOpenedUnsub = useRef<() => void>(() => {});
+  const onMessageUnsub = useRef<() => void>(() => { });
+  const onOpenedUnsub = useRef<() => void>(() => { });
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -437,6 +437,7 @@ export default function useFcm(isAuthenticated: boolean) {
               }
               handleNotificationNavigation(remoteMessage.data);
               if (remoteMessage.data.type !== 'POST_CREATED') {
+                handleNotificationNavigation(remoteMessage.data);
                 dispatch(markNotificationRead(remoteMessage.data.id));
               }
             }
