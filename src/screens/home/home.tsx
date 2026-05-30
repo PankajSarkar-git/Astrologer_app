@@ -183,8 +183,9 @@ const Home = () => {
                 item={item}
                 onStartSession={item => {
                   if (item.sessionType === 'CHAT') {
-                    dispatch(setOtherUser(item.chatSession.user));
-                    dispatch(setSession(item.chatSession));
+
+                    dispatch(setOtherUser(item?.chatSession?.user));
+                    dispatch(setSession(item?.chatSession));
                     navigation.navigate('ChatScreen');
                   }
                 }}
@@ -193,6 +194,8 @@ const Home = () => {
                     id,
                     status: 'APPROVED',
                   });
+
+
                 }}
                 onComplete={({ id }) => {
                   updateStatus({

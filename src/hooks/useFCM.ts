@@ -356,12 +356,13 @@ import {
   AuthorizationStatus,
   FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging';
-import { useAppDispatch } from '../hooks/redux-hook';
+import { useAppDispatch, useAppSelector } from '../hooks/redux-hook';
 import { handleNotificationNavigation } from './notification-handler';
 import { markNotificationRead } from '../store/reducer/notifications';
 import { setOtherUser, setSession } from '../store/reducer/session';
 import { useDeviceToken } from '../api/hooks/useAuth';
 import Toast, { showToast } from '../components/common/toast';
+import { RootState } from '../store';
 export default function useFcm(isAuthenticated: boolean) {
   const dispatch = useAppDispatch();
   const [fcmToken, setFcmToken] = useState<string>();
@@ -369,6 +370,7 @@ export default function useFcm(isAuthenticated: boolean) {
   const { mutate: sendDeviceToken } = useDeviceToken();
   const onMessageUnsub = useRef<() => void>(() => { });
   const onOpenedUnsub = useRef<() => void>(() => { });
+  const { otherUser, session } = useAppSelector((state: RootState) => state.session);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -406,11 +408,15 @@ export default function useFcm(isAuthenticated: boolean) {
         onMessageUnsub.current = onMessage(
           messaging,
           async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-            console.log('Foreground message:', remoteMessage);
-            showToast({
-              message: remoteMessage.notification?.title ?? 'New Message',
-              type: 'info',
-            });
+            const sessionFromMessage = JSON.parse(remoteMessage?.data?.session || '{}');
+
+            if (session?.id !== sessionFromMessage?.id) {
+              showToast({
+                message: remoteMessage.notification?.title ?? 'New Message',
+                type: 'info',
+              });
+            }
+
           },
         );
 
@@ -425,10 +431,7 @@ export default function useFcm(isAuthenticated: boolean) {
           messaging,
           (remoteMessage: any) => {
             if (remoteMessage?.data) {
-              console.log(
-                remoteMessage?.data,
-                '----------------------------------------------------------------------------------------caht message',
-              );
+
 
               if (initialMessage?.data?.type === 'CHAT_MESSAGE') {
                 const decodedData = JSON.parse(remoteMessage?.data?.session);
@@ -474,7 +477,7 @@ export default function useFcm(isAuthenticated: boolean) {
       onMessageUnsub.current?.();
       onOpenedUnsub.current?.();
     };
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch, session]);
 
   return { fcmToken, registering };
 }

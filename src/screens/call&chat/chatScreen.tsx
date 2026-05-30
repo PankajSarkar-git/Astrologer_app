@@ -10,7 +10,7 @@ import {
   StyleSheet,
   Image,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
 import Modal from 'react-native-modal';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
@@ -32,6 +32,7 @@ import {
   addMessage,
   prependMessages,
   setMessages,
+  setOtherUser,
   setSession,
 } from '../../store/reducer/session';
 import CameraModal from '../../components/common/camera-modal';
@@ -169,8 +170,19 @@ const ChatScreen = () => {
       chatEndSub && unsubscribe(chatEndDest);
       chatMessage && unsubscribe(messageSubDest);
       typingSub && unsubscribe(typingSubDest);
+
     };
   }, [session, subscribe]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+
+        dispatch(setSession(null));
+        dispatch(setOtherUser(null));
+      };
+    }, [])
+  );
 
   /* ================= SEND MESSAGE ================= */
 
@@ -255,7 +267,7 @@ const ChatScreen = () => {
 
     return (
       <TouchableOpacity
-        onPress={item.type === 'IMAGE' ? handleImagePress : () => {}}
+        onPress={item.type === 'IMAGE' ? handleImagePress : () => { }}
         activeOpacity={0.9}
       >
         <View
@@ -320,7 +332,7 @@ const ChatScreen = () => {
 
       // optimistic UI
       dispatch(addMessage(newMsg));
-    } catch (error) {}
+    } catch (error) { }
   };
 
   return (

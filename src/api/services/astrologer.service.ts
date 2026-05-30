@@ -54,10 +54,11 @@ export const AstrologerService = {
   },
 
   /* -------- CHANGE ONLINE STATUS -------- */
-  changeOnline: async (isOnline: boolean) => {
-    const res = await api.post('/api/v1/astrologers/change-online', {
-      isOnline,
-    });
+  changeOnline: async (data: {
+    onlineType: 'CHATONLINE' | 'AUDIOONLINE' | 'VIDEOONLINE';
+    status: boolean;
+  }) => {
+    const res = await api.post('/api/v1/astrologers/change-online', data);
     return res.data;
   },
   updateProfilePic: async (id: string, file: any) => {

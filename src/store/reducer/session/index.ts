@@ -62,6 +62,7 @@ const sessionSlice = createSlice({
     /* -------- SESSION -------- */
 
     setSession(state, action: PayloadAction<ChatSession | null>) {
+      console.log("==================setSession------", action.payload);
       state.session = action.payload;
     },
 

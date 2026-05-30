@@ -103,26 +103,144 @@ export function useUpdateAstrologer() {
 
 /* ---------------- CHANGE ONLINE STATUS ---------------- */
 
-export function useChangeAstrologerOnline() {
+// export function useChangeAstrologerOnline(id:string) {
+//   const client = useQueryClient();
+
+//   return useMutation({
+//     mutationFn: (data: {
+//       onlineType: 'CHATONLINE' | 'AUDIOONLINE' | 'VIDEOONLINE';
+//       status: boolean;
+//     }) => AstrologerService.changeOnline(data),
+
+//     onSuccess: res => {
+//       showToast({
+//         type: 'success',
+//         message: res?.msg || 'Status updated',
+//       });
+
+//       client.invalidateQueries({ queryKey: ['astrologers'] });
+//       client.invalidateQueries({ queryKey: ['astrologer'] });
+//     },
+
+//     onError: (err: any) => {
+//       showToast({
+//         type: 'error',
+//         message: err?.response?.data?.msg || 'Failed to update status',
+//       });
+//     },
+//   });
+// }
+
+export function useChangeAstrologerOnline(id: string) {
   const client = useQueryClient();
 
   return useMutation({
-    mutationFn: (isOnline: boolean) => AstrologerService.changeOnline(isOnline),
+    mutationFn: (data: {
+      onlineType:
+      | 'CHATONLINE'
+      | 'AUDIOONLINE'
+      | 'VIDEOONLINE';
+      status: boolean;
+    }) => AstrologerService.changeOnline(data),
 
+    /* ================= OPTIMISTIC UPDATE ================= */
+    onMutate: async variables => {
+      await client.cancelQueries({
+        queryKey: ['astrologer', id],
+      });
+
+      // Save previous data for rollback
+      const previousData = client.getQueryData([
+        'astrologer',
+        id,
+      ]);
+
+      // Update UI instantly
+      client.setQueryData(
+        ['astrologer', id],
+        (old: any) => {
+          if (!old?.astrologer) return old;
+
+          const updatedAstrologer = {
+            ...old.astrologer,
+          };
+
+          if (
+            variables.onlineType ===
+            'CHATONLINE'
+          ) {
+            updatedAstrologer.isChatOnline =
+              variables.status;
+          }
+
+          if (
+            variables.onlineType ===
+            'AUDIOONLINE'
+          ) {
+            updatedAstrologer.isAudioOnline =
+              variables.status;
+          }
+
+          if (
+            variables.onlineType ===
+            'VIDEOONLINE'
+          ) {
+            updatedAstrologer.isVideoOnline =
+              variables.status;
+          }
+
+          updatedAstrologer.online =
+            updatedAstrologer.isChatOnline ||
+            updatedAstrologer.isAudioOnline ||
+            updatedAstrologer.isVideoOnline;
+
+          return {
+            ...old,
+            astrologer: updatedAstrologer,
+          };
+        },
+      );
+
+      return { previousData };
+    },
+
+    /* ================= SUCCESS ================= */
     onSuccess: res => {
       showToast({
         type: 'success',
-        message: res?.msg || 'Status updated',
+        message:
+          res?.msg || 'Status updated',
       });
-
-      client.invalidateQueries({ queryKey: ['astrologers'] });
-      client.invalidateQueries({ queryKey: ['astrologer'] });
     },
 
-    onError: (err: any) => {
+    /* ================= ERROR ROLLBACK ================= */
+    onError: (
+      err: any,
+      _variables,
+      context,
+    ) => {
+      // rollback previous state
+      client.setQueryData(
+        ['astrologer', id],
+        context?.previousData,
+      );
+
       showToast({
         type: 'error',
-        message: err?.response?.data?.msg || 'Failed to update status',
+        message:
+          err?.response?.data?.msg ||
+          'Failed to update status',
+      });
+    },
+
+    /* ================= REFRESH ================= */
+    onSettled: () => {
+      client.invalidateQueries({
+        queryKey: ['astrologers'],
+      });
+
+      client.invalidateQueries({
+        queryKey: ['astrologer', id],
       });
     },
   });

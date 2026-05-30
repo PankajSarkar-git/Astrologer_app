@@ -77,6 +77,7 @@ export function useCurrentUser() {
     queryKey: ['currentUser'],
     queryFn: AuthService.getCurrentUser,
   });
+  console.log(query.data, "----astrologer detail")
 
   useEffect(() => {
     if (query.data) {

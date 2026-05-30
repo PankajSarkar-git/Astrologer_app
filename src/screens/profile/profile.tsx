@@ -24,7 +24,9 @@ import { COLORS } from '../../constant/colors';
 import { useUserRole } from '../../hooks/use-role';
 import { useAppSelector } from '../../hooks/redux-hook';
 import PageWithHeader from '../../components/layout/page-with-header';
-import { useAstrologerDetail } from '../../api/hooks/useAstrologers';
+import { useAstrologerDetail, useChangeAstrologerOnline } from '../../api/hooks/useAstrologers';
+import { Switch } from 'react-native';
+
 
 const ProfilePage = () => {
   const role = useUserRole();
@@ -35,12 +37,19 @@ const ProfilePage = () => {
 
   const { data, isLoading, refetch } = useAstrologerDetail(astroId);
 
+  const {
+    mutate: changeOnline,
+    isPending: updatingStatus,
+  } = useChangeAstrologerOnline(astroId);
+
+
+
   useEffect(() => {
     refetch();
   }, []);
 
   const profileData = data?.astrologer;
-
+  console.log(profileData, "----profile data")
   /* ---------- AVATAR ---------- */
   const avatar =
     profileData?.user?.imgUri ||
@@ -156,6 +165,126 @@ const ProfilePage = () => {
             </Text>
           </View>
         )}
+
+        {/* ================= ONLINE STATUS ================= */}
+        {isAstrologer && (
+          <View style={[styles.card, { marginBottom: 80 }]}>
+            <Text style={styles.cardTitle}>
+              Availability Status
+            </Text>
+
+            {/* CHAT */}
+            <View style={styles.statusRow}>
+              <View>
+                <Text style={styles.statusLabel}>
+                  Chat
+                </Text>
+
+                <Text style={styles.statusText}>
+                  {profileData?.isChatOnline
+                    ? 'Online'
+                    : 'Offline'}
+                </Text>
+              </View>
+
+              <Switch
+                value={
+                  !!profileData?.isChatOnline
+                }
+                disabled={updatingStatus}
+                trackColor={{
+                  false:
+                    COLORS.theme.gray.light,
+                  true: COLORS.theme.primary,
+                }}
+                thumbColor={
+                  COLORS.theme.white
+                }
+                onValueChange={value => {
+                  changeOnline({
+                    onlineType:
+                      'CHATONLINE',
+                    status: value,
+                  });
+                }}
+              />
+            </View>
+
+            {/* AUDIO */}
+            <View style={styles.statusRow}>
+              <View>
+                <Text style={styles.statusLabel}>
+                  Audio Call
+                </Text>
+
+                <Text style={styles.statusText}>
+                  {profileData?.isAudioOnline
+                    ? 'Online'
+                    : 'Offline'}
+                </Text>
+              </View>
+
+              <Switch
+                value={
+                  !!profileData?.isAudioOnline
+                }
+                disabled={updatingStatus}
+                trackColor={{
+                  false:
+                    COLORS.theme.gray.light,
+                  true: COLORS.theme.primary,
+                }}
+                thumbColor={
+                  COLORS.theme.white
+                }
+                onValueChange={value => {
+                  changeOnline({
+                    onlineType:
+                      'AUDIOONLINE',
+                    status: value,
+                  });
+                }}
+              />
+            </View>
+
+            {/* VIDEO */}
+            <View style={styles.statusRow}>
+              <View>
+                <Text style={styles.statusLabel}>
+                  Video Call
+                </Text>
+
+                <Text style={styles.statusText}>
+                  {profileData?.isVideoOnline
+                    ? 'Online'
+                    : 'Offline'}
+                </Text>
+              </View>
+
+              <Switch
+                value={
+                  !!profileData?.isVideoOnline
+                }
+                disabled={updatingStatus}
+                trackColor={{
+                  false:
+                    COLORS.theme.gray.light,
+                  true: COLORS.theme.primary,
+                }}
+                thumbColor={
+                  COLORS.theme.white
+                }
+                onValueChange={value => {
+                  changeOnline({
+                    onlineType:
+                      'VIDEOONLINE',
+                    status: value,
+                  });
+                }}
+              />
+            </View>
+          </View>
+        )}
       </ScrollView>
     </PageWithHeader>
   );
@@ -253,5 +382,27 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(14),
     color: COLORS.theme.gray.text,
     lineHeight: 20,
+  },
+
+  statusRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: verticalScale(10),
+    borderBottomWidth: 1,
+    borderBottomColor:
+      COLORS.theme.gray.light,
+  },
+
+  statusLabel: {
+    fontSize: scaleFont(14),
+    fontWeight: '600',
+    color: COLORS.theme.black,
+  },
+
+  statusText: {
+    fontSize: scaleFont(12),
+    color: COLORS.theme.gray.text,
+    marginTop: 2,
   },
 });
