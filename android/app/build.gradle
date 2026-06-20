@@ -84,8 +84,18 @@ android {
         applicationId "com.astrosevaa.astro"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 13
-        versionName "13.0"
+        versionCode 14
+        versionName "14.0"
+    }
+    applicationVariants.all { variant ->
+    variant.outputs.all {
+
+        def date = new Date().format("yyyy-MM-dd_HH-mm-ss")
+
+        if (outputFileName.endsWith(".apk")) {
+            outputFileName = "saveadmin-${date}.apk"
+        }
+    }
     }
     signingConfigs {
         release {

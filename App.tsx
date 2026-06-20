@@ -14,6 +14,7 @@ import { ZegoCallInvitationDialog } from '@zegocloud/zego-uikit-prebuilt-call-rn
 import { navigationRef } from './src/hooks/navigation';
 import { useEffect } from 'react';
 import notifee, { AndroidImportance } from '@notifee/react-native';
+import Config from 'react-native-config';
 
 Object.assign(globalThis, encoding);
 
@@ -30,8 +31,18 @@ function App() {
     });
   }
 
+  async function createZegoChannel() {
+    await notifee.createChannel({
+      id: Config.ZEGO_CHANNEl_ID!,
+      name: Config.ZEGO_CHANNEl_NAME!,
+      importance: AndroidImportance.HIGH,
+      sound: 'zego_incoming', // without .mp3
+    });
+  }
+
   // Call this once when app starts
   useEffect(() => {
+    createZegoChannel();
     createNotificationChannel();
   }, []);
 
