@@ -368,9 +368,11 @@ export default function useFcm(isAuthenticated: boolean) {
   const [fcmToken, setFcmToken] = useState<string>();
   const [registering, setRegistering] = useState(false);
   const { mutate: sendDeviceToken } = useDeviceToken();
-  const onMessageUnsub = useRef<() => void>(() => { });
-  const onOpenedUnsub = useRef<() => void>(() => { });
-  const { otherUser, session } = useAppSelector((state: RootState) => state.session);
+  const onMessageUnsub = useRef<() => void>(() => {});
+  const onOpenedUnsub = useRef<() => void>(() => {});
+  const { otherUser, session } = useAppSelector(
+    (state: RootState) => state.session,
+  );
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -393,6 +395,7 @@ export default function useFcm(isAuthenticated: boolean) {
         }
 
         const token = await getToken(messaging);
+        console.log(token, 'FCM token');
         if (mounted) setFcmToken(token);
 
         if (token) {
@@ -408,7 +411,9 @@ export default function useFcm(isAuthenticated: boolean) {
         onMessageUnsub.current = onMessage(
           messaging,
           async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-            const sessionFromMessage = JSON.parse(remoteMessage?.data?.session || '{}');
+            const sessionFromMessage = JSON.parse(
+              remoteMessage?.data?.session || '{}',
+            );
 
             if (session?.id !== sessionFromMessage?.id) {
               showToast({
@@ -416,7 +421,6 @@ export default function useFcm(isAuthenticated: boolean) {
                 type: 'info',
               });
             }
-
           },
         );
 
@@ -431,8 +435,6 @@ export default function useFcm(isAuthenticated: boolean) {
           messaging,
           (remoteMessage: any) => {
             if (remoteMessage?.data) {
-
-
               if (initialMessage?.data?.type === 'CHAT_MESSAGE') {
                 const decodedData = JSON.parse(remoteMessage?.data?.session);
                 dispatch(setOtherUser(decodedData.astrologer));

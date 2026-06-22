@@ -1,4 +1,4 @@
-package com.astrosevaa.astro
+package com.cartoonvideo.firebaserecycleviewkotlin
 
 import android.app.Application
 import com.facebook.react.PackageList

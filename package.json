@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "postinstall": "patch-package react-native-keep-awake"
+    "patch": "patch-package react-native-keep-awake"
   },
   "dependencies": {
     "@notifee/react-native": "^9.1.8",
