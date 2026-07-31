@@ -79,9 +79,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.cartoonvideo.firebaserecycleviewkotlin"
+    namespace "com.Insapimarketing.sevaaadmin2"
     defaultConfig {
-        applicationId "com.cartoonvideo.firebaserecycleviewkotlin"
+        applicationId "com.Insapimarketing.sevaaadmin2"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 11

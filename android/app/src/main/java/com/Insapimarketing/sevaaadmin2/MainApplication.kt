@@ -1,4 +1,4 @@
-package com.cartoonvideo.firebaserecycleviewkotlin
+package com.Insapimarketing.sevaaadmin2
 
 import android.app.Application
 import com.facebook.react.PackageList

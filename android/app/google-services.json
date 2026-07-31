@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:178759375808:android:83963d6b10d06cecbf0625",
+        "android_client_info": {
+          "package_name": "com.Insapimarketing.sevaaadmin2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiXRRTRbtHH_jCXRoolarbJSd1h2kdC4o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:178759375808:android:419ed8cd3ef9f1ccbf0625",
         "android_client_info": {
           "package_name": "com.astrosevaa.astro"

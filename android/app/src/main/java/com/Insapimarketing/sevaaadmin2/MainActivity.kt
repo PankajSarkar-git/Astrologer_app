@@ -1,4 +1,4 @@
-package com.cartoonvideo.firebaserecycleviewkotlin
+package com.Insapimarketing.sevaaadmin2
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
