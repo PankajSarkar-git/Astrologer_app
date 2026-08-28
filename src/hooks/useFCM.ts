@@ -363,6 +363,11 @@ import { setOtherUser, setSession } from '../store/reducer/session';
 import { useDeviceToken } from '../api/hooks/useAuth';
 import Toast, { showToast } from '../components/common/toast';
 import { RootState } from '../store';
+import {
+  CALL_NOTIFICATION_TYPE,
+  cancelIncomingCallNotification,
+  showIncomingCallNotification,
+} from '../services/call-notification';
 export default function useFcm(isAuthenticated: boolean) {
   const dispatch = useAppDispatch();
   const [fcmToken, setFcmToken] = useState<string>();
@@ -408,19 +413,69 @@ export default function useFcm(isAuthenticated: boolean) {
         }
 
         // Foreground messages
+        // onMessageUnsub.current = onMessage(
+        //   messaging,
+        //   async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+        //     const sessionFromMessage = JSON.parse(
+        //       remoteMessage?.data?.session || '{}',
+        //     );
+
+        //     if (session?.id !== sessionFromMessage?.id) {
+        //       showToast({
+        //         message: remoteMessage.notification?.title ?? 'New Message',
+        //         type: 'info',
+        //       });
+        //     }
+        //   },
+        // );
+
         onMessageUnsub.current = onMessage(
           messaging,
           async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
-            const sessionFromMessage = JSON.parse(
-              remoteMessage?.data?.session || '{}',
-            );
+            console.log('Foreground message:', remoteMessage);
 
-            if (session?.id !== sessionFromMessage?.id) {
-              showToast({
-                message: remoteMessage.notification?.title ?? 'New Message',
-                type: 'info',
-              });
+            const data = remoteMessage.data;
+
+            if (!data) {
+              return;
             }
+
+            if (data.type === CALL_NOTIFICATION_TYPE.INCOMING_CALL) {
+              await showIncomingCallNotification({
+                callId: String(data?.callId),
+                roomId: String(data?.roomId),
+                callerId: String(data?.callerId),
+                callerName: String(data?.callerName),
+                sessionType: data.sessionType as any,
+              });
+
+              return;
+            }
+
+            if (data.type === CALL_NOTIFICATION_TYPE.CALL_CANCELLED) {
+              if (data.callId) {
+                await cancelIncomingCallNotification(String(data.callId));
+              }
+
+              return;
+            }
+
+            /* =========================================
+       NORMAL NOTIFICATIONS
+    ========================================= */
+
+            // const currentRoute = getCurrentRouteName();
+
+            // if (currentRoute === 'ChatScreen' && data.type === 'CHAT_MESSAGE') {
+            //   return;
+            // }
+
+            // handleNotificationNavigation(data);
+
+            showToast({
+              message: remoteMessage.notification?.title ?? 'New Message',
+              type: 'info',
+            });
           },
         );
 

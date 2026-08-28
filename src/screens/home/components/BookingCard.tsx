@@ -5,6 +5,10 @@ import { COLORS } from '../../../constant/colors';
 import { textStyle } from '../../../constant/text-style';
 import { ZegoSendCallInvitationButton } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import Config from 'react-native-config';
+import { navigationRef } from '../../../hooks/navigation';
+import { handleApiError } from '../../../utils/handle-api-error';
+import { useAppDispatch } from '../../../hooks/redux-hook';
+import { startCall } from '../../../store/reducer/session/action';
 
 type BookingCardProps = {
   item: any;
@@ -21,6 +25,7 @@ export const BookingCard = ({
   onStartSession,
   onComplete,
 }: BookingCardProps) => {
+  const dispatch = useAppDispatch();
   const getStatusColor = (status: string) => {
     if (status === 'PENDING') return '#FFA726';
     if (status === 'APPROVED') return '#42A5F5';
@@ -64,6 +69,45 @@ export const BookingCard = ({
     if (!key) return AVATAR_COLORS[0];
     const index = key.length % AVATAR_COLORS.length;
     return AVATAR_COLORS[index];
+  };
+
+  const handleStartCall = async (item: any) => {
+    try {
+      const { payload } = await dispatch(
+        startCall({
+          receiverId: item.user.id,
+          sessionType: item.sessionType,
+        }),
+      );
+      console.log(payload, '---response', item);
+      if (payload?.success) {
+        const roomId = payload?.roomId;
+
+        // await showIncomingCallNotification({
+        //   callId: '123',
+        //   roomId: 'room_abc',
+        //   callerId: 'user_123',
+        //   callerName: 'Satyam',
+        //   sessionType: 'VIDEO',
+        // });
+
+        navigationRef.navigate('CallScreen', {
+          roomId,
+          sessionId: item.callSessionId,
+          callType: item.sessionType,
+
+          user: {
+            id: item.user.id,
+            name: item.user.name,
+            imageUri: item.user.imgUri,
+          },
+
+          isAstrologer: true,
+        });
+      }
+    } catch (err) {
+      handleApiError(err, 'Unable to start call...');
+    }
   };
 
   return (
@@ -263,7 +307,7 @@ export const BookingCard = ({
             marginTop: verticalScale(12),
           }}
         >
-          {item.sessionType === 'AUDIO' && (
+          {/* {item.sessionType === 'AUDIO' && (
             <View style={{ paddingHorizontal: verticalScale(10) }}>
               <ZegoSendCallInvitationButton
                 invitees={[
@@ -291,7 +335,36 @@ export const BookingCard = ({
                 resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa1'}
               />
             </View>
-          )}
+          )} */}
+
+          {(item.sessionType === 'AUDIO' || item.sessionType === 'VIDEO') &&
+            item.status === 'APPROVED' && (
+              <TouchableOpacity
+                onPress={() => handleStartCall(item)}
+                style={{
+                  // marginTop: verticalScale(8),
+                  backgroundColor: COLORS.theme.primary,
+                  paddingVertical: verticalScale(10),
+                  paddingHorizontal: scale(20),
+                  marginRight: scale(8),
+                  borderRadius: scale(10),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontWeight: '600',
+                    fontSize: scaleFont(14),
+                  }}
+                >
+                  {item.sessionType === 'VIDEO'
+                    ? 'Start Video Call'
+                    : 'Start Audio Call'}
+                </Text>
+              </TouchableOpacity>
+            )}
 
           {item.sessionType === 'CHAT' && (
             <TouchableOpacity

@@ -30,6 +30,7 @@ import ChatHistory from '../screens/ChatHistory/ChatHistory';
 import ChatScreen from '../screens/call&chat/chatScreen';
 import { askCallPermissions } from '../utils/askPermission';
 import Notification from '../screens/notification';
+import CallScreen from '../screens/call';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -68,11 +69,11 @@ export default function AppNavigator() {
     'user?.mobile, user?.name',
   );
 
-  useZegoAndFCM(
-    user?.mobile,
-    user?.name?.slice(0, 20) || 'Guest',
-    isAuthenticated,
-  );
+  // useZegoAndFCM(
+  //   user?.mobile,
+  //   user?.name?.slice(0, 20) || 'Guest',
+  //   isAuthenticated,
+  // );
   const { connect, isConnected, disconnect, send } = useWebSocket(user?.id);
 
   if (loading) {
@@ -95,6 +96,8 @@ export default function AppNavigator() {
           <Stack.Screen name="about" component={About} />
           <Stack.Screen name="Wallet" component={AstrologerWallet} />
           <Stack.Screen name="History" component={ChatHistory} />
+          {/* <Stack.Screen name="CallScreen" component={CallScreen} /> */}
+
           <Stack.Screen
             name="ChatScreen"
             component={ChatScreen}
@@ -103,7 +106,8 @@ export default function AppNavigator() {
             }}
           />
           <Stack.Screen name="Notification" component={Notification} />
-          <Stack.Screen
+          <Stack.Screen name="CallScreen" component={CallScreen} />
+          {/* <Stack.Screen
             options={{ headerShown: false }}
             // DO NOT change the name
             name="ZegoUIKitPrebuiltCallWaitingScreen"
@@ -114,7 +118,7 @@ export default function AppNavigator() {
             // DO NOT change the name
             name="ZegoUIKitPrebuiltCallInCallScreen"
             component={ZegoUIKitPrebuiltCallInCallScreen}
-          />
+          /> */}
         </>
       )}
     </Stack.Navigator>
